@@ -35,7 +35,7 @@ Gold 🟡 → KPI-ready data <br/>
 
 This enables efficient querying and supports analytical use cases.
 
-## Phase 4 — Analytics Layer
+## Phase 4 - Analytics Layer
 
 Power BI is used to build dashboards focused on production performance.
 
