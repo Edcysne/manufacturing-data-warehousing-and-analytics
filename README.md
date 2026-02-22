@@ -29,11 +29,9 @@ This replaces the previous file-based approach with a controlled and repeatable 
 
 A data warehouse is implemented in Azure SQL Database using a layered approach:
 
-Bronze 🟤 → Raw data
-
-Silver ⚪ → Cleaned and structured data
-
-Gold 🟡 → KPI-ready data
+Bronze 🟤 → Raw data <br/>
+Silver ⚪ → Cleaned and structured data <br/>
+Gold 🟡 → KPI-ready data <br/>
 
 This enables efficient querying and supports analytical use cases.
 
