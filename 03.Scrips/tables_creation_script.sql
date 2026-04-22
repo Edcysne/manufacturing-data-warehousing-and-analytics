@@ -95,3 +95,15 @@ CREATE TABLE bronze_layer.wel_status_data (
     cycle_time                  DECIMAL(5,2)
 
 );
+
+-- This is a new table in the bronze_layer that I'm going to use to check if the data has
+-- been already loaded into the model or not
+
+CREATE TABLE bronze_layer.wel_file_log (
+
+    ID              VARCHAR(250) PRIMARY KEY,
+    file_name       VARCHAR(250),
+    loaded_at       DATETIME DEFAULT GETDATE(),
+    status          VARCHAR(50)  -- 'success' or 'error'
+
+);
