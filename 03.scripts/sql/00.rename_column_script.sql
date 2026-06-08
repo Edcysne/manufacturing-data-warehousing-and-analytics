@@ -1,1 +1,0 @@
-EXEC sp_rename 'silver_layer.fact_breakdown_table.event_time', 'duration', 'COLUMN';

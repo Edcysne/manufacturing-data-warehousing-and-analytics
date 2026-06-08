@@ -24,8 +24,11 @@ NOTES:      - All tables carry the _dev suffix and are used for testing.
             - Script is idempotent: each table is dropped and recreated on every run.
             - Both fact tables are dropped first, since a dimension cannot be dropped while a
             foreign key from a fact still references it.
-            - Foreign keys are added with ALTER TABLE at the end, so table create order is
-            irrelevant; dimensions must be populated before the facts.
+            - Foreign keys are declared INLINE in each fact's CREATE TABLE, so the dimensions
+            are created BEFORE the facts (the breakdown fact is created after the dimensions
+            for this reason).
+            - Dimensions must be populated before the facts, or the foreign keys will reject
+            the fact rows.
 
 ------------------------------------------------------------------------------------------------
 AUTHOR:     Eduardo Cysne
@@ -37,20 +40,6 @@ STARTED:    06/06/2026
 -- Facts are dropped first: a dimension cannot be dropped while a FK from a fact still references it.
 DROP TABLE IF EXISTS gold_layer.fact_status_table_dev;
 DROP TABLE IF EXISTS gold_layer.fact_breakdown_table_dev;
-CREATE TABLE gold_layer.fact_breakdown_table_dev (
-
-    source_id            VARCHAR(250) PRIMARY KEY,
-    date_id              INT NOT NULL,
-    product_id           INT NOT NULL,
-    work_station_id      INT NOT NULL,
-    failure_id           INT NOT NULL,
-    event_time           TIME(0) NOT NULL,
-    unplanned_downtime   INT NULL,
-    planned_downtime     INT NULL,
-    failure_description  VARCHAR(MAX) NULL,
-    met_date_created     DATETIME2 DEFAULT GETDATE() -- A metadata column to get the creation date/time
-
-);
 
 -- Security Layer for table existance checking
 DROP TABLE IF EXISTS gold_layer.dim_date_dev;
@@ -128,6 +117,29 @@ CREATE TABLE gold_layer.dim_product_details_dev (
 );
 
 -- Security Layer for table existance checking
+-- fact_breakdown_table_dev is dropped at the top of the script (before the dimensions),
+-- and created here AFTER the dimensions so its inline foreign keys can resolve.
+CREATE TABLE gold_layer.fact_breakdown_table_dev (
+
+    source_id            VARCHAR(250) PRIMARY KEY,
+    date_id              INT NOT NULL,
+    product_id           INT NOT NULL,
+    work_station_id      INT NOT NULL,
+    failure_id           INT NOT NULL,
+    event_time           TIME(0) NOT NULL,
+    unplanned_downtime   INT NULL,
+    planned_downtime     INT NULL,
+    failure_description  VARCHAR(MAX) NULL,
+    met_date_created     DATETIME2 DEFAULT GETDATE(), -- A metadata column to get the creation date/time
+
+    CONSTRAINT FK_fact_breakdown_date FOREIGN KEY (date_id) REFERENCES gold_layer.dim_date_dev (date_id),
+    CONSTRAINT FK_fact_breakdown_product FOREIGN KEY (product_id) REFERENCES gold_layer.dim_product_dev (product_id),
+    CONSTRAINT FK_fact_breakdown_workstation FOREIGN KEY (work_station_id) REFERENCES gold_layer.dim_work_stations_dev (work_station_id),
+    CONSTRAINT FK_fact_breakdown_failure FOREIGN KEY (failure_id) REFERENCES gold_layer.dim_failures_dev (failure_id)
+
+);
+
+-- Security Layer for table existance checking
 -- fact_status_table_dev is dropped at the top of the script (before the dimensions).
 CREATE TABLE gold_layer.fact_status_table_dev (
 
@@ -157,6 +169,11 @@ CREATE TABLE gold_layer.fact_status_table_dev (
     ok_first_parts           INT NULL,
     ftq                      DECIMAL(5,1) NULL,
     oee                      DECIMAL(5,1) NULL,
-    met_date_created         DATETIME2 DEFAULT GETDATE() -- A metadata column to get the creation date/time
+    met_date_created         DATETIME2 DEFAULT GETDATE(), -- A metadata column to get the creation date/time
+
+    CONSTRAINT FK_fact_status_date FOREIGN KEY (date_id) REFERENCES gold_layer.dim_date_dev (date_id),
+    CONSTRAINT FK_fact_status_product FOREIGN KEY (product_id) REFERENCES gold_layer.dim_product_dev (product_id),
+    CONSTRAINT FK_fact_status_teamleader FOREIGN KEY (team_leader_status_id) REFERENCES gold_layer.dim_team_leaders_status_dev (team_leader_status_id),
+    CONSTRAINT FK_fact_status_productdetails FOREIGN KEY (product_details_id) REFERENCES gold_layer.dim_product_details_dev (product_details_id)
 
 );
