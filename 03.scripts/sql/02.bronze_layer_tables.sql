@@ -139,7 +139,7 @@ CREATE TABLE bronze_layer.wel_breakdown_data (
     equipment                VARCHAR(50),
     failure_type             VARCHAR(50),
     sub_code                 VARCHAR(50),
-    failure_description      NVARCHAR(MAX)    
+    failure_description      VARCHAR(MAX)    
 );
 
 -- Security Layer for Database Existance Checking
@@ -162,7 +162,7 @@ CREATE TABLE bronze_layer.wel_status_data (
     accidents                   INT,
     near_accidents              INT,
     customer_complaints         INT,
-    observations                NVARCHAR(MAX),
+    observations                VARCHAR(MAX),
     version                     VARCHAR(25),
     cycle_time                  DECIMAL(5,2)
 

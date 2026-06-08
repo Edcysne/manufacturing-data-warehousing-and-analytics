@@ -15,8 +15,8 @@ OUTPUT:     Dimensions  ->  dim_date_dev
                             dim_product_dev
                             dim_team_leaders_status_dev
                             dim_product_details_dev
-            Facts       ->  fact_breakdown_table
-                            fact_status_table
+            Facts       ->  fact_breakdown_table_dev
+                            fact_status_table_dev
 
 NOTES:      - All tables carry the _dev suffix and are used for testing.
             - Script is idempotent: each table is dropped and recreated on every run.
@@ -245,8 +245,8 @@ INSERT INTO silver_layer.dim_product_dev (full_line, version, manufacturer, mode
 */
 
 -- Security Layer for table existance checking
-DROP TABLE IF EXISTS silver_layer.fact_breakdown_table;
-CREATE TABLE silver_layer.fact_breakdown_table (
+DROP TABLE IF EXISTS silver_layer.fact_breakdown_table_dev;
+CREATE TABLE silver_layer.fact_breakdown_table_dev (
     source_id            VARCHAR(250) PRIMARY KEY,
     date_id              INT NOT NULL,
     product_id           INT NOT NULL,
@@ -255,13 +255,13 @@ CREATE TABLE silver_layer.fact_breakdown_table (
     event_time           TIME(0) NOT NULL,
     unplanned_downtime   INT NULL,
     planned_downtime     INT NULL,
-    failure_description  NVARCHAR(MAX),
+    failure_description  VARCHAR(MAX),
     met_date_created     DATETIME2 DEFAULT GETDATE() -- A metadata column to get the creation date/time
 
 );
 
--- Populating fact_breakdown_table table
-INSERT INTO silver_layer.fact_breakdown_table (
+-- Populating fact_breakdown_table_dev table
+INSERT INTO silver_layer.fact_breakdown_table_dev (
     source_id, 
     date_id, 
     product_id, 
@@ -307,15 +307,20 @@ CREATE TABLE silver_layer.dim_team_leaders_status_dev (
     shift                   VARCHAR(10) NOT NULL,
     team_leader             VARCHAR(30) NOT NULL,
     num_operators           INT NOT NULL,
+    all_time                INT NOT NULL,
     met_date_created        DATETIME2 DEFAULT GETDATE() -- A metadata column to get the creation date/time
 );
 
 -- Populating dim_team_leaders_status_dev table
-INSERT INTO silver_layer.dim_team_leaders_status_dev (shift, team_leader, num_operators)
+INSERT INTO silver_layer.dim_team_leaders_status_dev (shift, team_leader, num_operators, all_time)
     SELECT DISTINCT
-        TRIM(b.shift),
+        REPLACE(TRIM(b.shift), 'night', 'evening') AS shift,
         TRIM(b.team_leader),
-        b.num_operators
+        b.num_operators,
+        CASE
+            WHEN TRIM(b.shift) = 'night' THEN 450
+            ELSE 480
+        END AS all_time
     FROM bronze_layer.wel_status_data b
     WHERE b.shift IS NOT NULL
         AND b.team_leader IS NOT NULL
@@ -377,7 +382,7 @@ CREATE TABLE bronze_layer.wel_status_data (
     accidents                   INT,
     near_accidents              INT,
     customer_complaints         INT,
-    observations                NVARCHAR(MAX),
+    observations                VARCHAR(MAX),
     version                     VARCHAR(25),
     cycle_time                  DECIMAL(5,2)
 
@@ -387,8 +392,8 @@ CREATE TABLE bronze_layer.wel_status_data (
 */
 
 -- Security Layer for table existance checking
-DROP TABLE IF EXISTS silver_layer.fact_status_table;
-CREATE TABLE silver_layer.fact_status_table (
+DROP TABLE IF EXISTS silver_layer.fact_status_table_dev;
+CREATE TABLE silver_layer.fact_status_table_dev (
     source_id               VARCHAR(250) PRIMARY KEY,
     date_id                 INT NOT NULL,
     product_id              INT NOT NULL,
@@ -401,12 +406,13 @@ CREATE TABLE silver_layer.fact_status_table (
     accidents               INT NULL,
     near_accidents          INT NULL,
     customer_complaints     INT NULL,
-    observations            NVARCHAR(MAX) NULL,
+    all_time                INT NULL,
+    observations            VARCHAR(MAX) NULL,
     met_date_created        DATETIME2 DEFAULT GETDATE() -- A metadata column to get the creation date/time
 );
 
--- Populating fact_status_table table
-INSERT INTO silver_layer.fact_status_table (
+-- Populating fact_status_table_dev table
+INSERT INTO silver_layer.fact_status_table_dev (
     source_id,
     date_id,
     product_id,
@@ -419,6 +425,7 @@ INSERT INTO silver_layer.fact_status_table (
     accidents,
     near_accidents,
     customer_complaints,
+    all_time,
     observations
 )
 
@@ -442,6 +449,7 @@ Observation: "my     name is eduardo         and I love    dogs  a lot"
         b.accidents,
         b.near_accidents,
         b.customer_complaints,
+        tl.all_time,
         REPLACE(REPLACE(REPLACE(TRIM(b.observations), ' ', '<>'), '><', ''), '<>', ' ') AS observations
     FROM bronze_layer.wel_status_data b
     JOIN silver_layer.dim_date_dev dt
@@ -450,7 +458,7 @@ Observation: "my     name is eduardo         and I love    dogs  a lot"
         ON p.full_line = TRIM(b.line)
     JOIN silver_layer.dim_team_leaders_status_dev tl
         ON tl.team_leader = TRIM(b.team_leader)
-        AND tl.shift = TRIM(b.shift)
+        AND tl.shift = REPLACE(TRIM(b.shift), 'night', 'evening')
         AND tl.num_operators = b.num_operators
     JOIN silver_layer.dim_product_details_dev pd
         ON ISNULL(pd.version,'') = ISNULL(b.version,'') -- NULL != NULL, but '' = ''
