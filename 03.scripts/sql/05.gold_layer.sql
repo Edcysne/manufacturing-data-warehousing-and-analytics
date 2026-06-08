@@ -57,6 +57,19 @@ CREATE TABLE gold_layer.dim_date_dev (
 
 );
 
+INSERT INTO gold_layer.dim_date_dev(date_id,full_date, day_num, day_name, week_num, month_num, month_name, year_num)
+SELECT
+    d.date_id,
+    d.full_date,
+    d.day_num,
+    d.day_name,
+    d.week_num,
+    d.month_num,
+    d.month_name,
+    d.year_num
+FROM silver_layer.dim_date_dev d;
+
+
 -- Security Layer for table existance checking
 DROP TABLE IF EXISTS gold_layer.dim_work_stations_dev;
 CREATE TABLE gold_layer.dim_work_stations_dev (
@@ -68,6 +81,13 @@ CREATE TABLE gold_layer.dim_work_stations_dev (
 
 );
 
+INSERT INTO gold_layer.dim_work_stations_dev(work_station_id, work_station, equipment)
+SELECT
+    d.work_station_id,
+    d.work_station,
+    d.equipment
+FROM silver_layer.dim_work_stations_dev d;
+
 -- Security Layer for table existance checking
 DROP TABLE IF EXISTS gold_layer.dim_failures_dev;
 CREATE TABLE gold_layer.dim_failures_dev (
@@ -78,6 +98,13 @@ CREATE TABLE gold_layer.dim_failures_dev (
     met_date_created     DATETIME2 DEFAULT GETDATE() -- A metadata column to get the creation date/time
 
 );
+
+INSERT INTO gold_layer.dim_failures_dev(failure_id, failure_type, sub_code)
+SELECT
+    d.failure_id,
+    d.failure_type,
+    d.sub_code
+FROM silver_layer.dim_failures_dev d;
 
 -- Security Layer for table existance checking
 DROP TABLE IF EXISTS gold_layer.dim_product_dev;
@@ -93,6 +120,16 @@ CREATE TABLE gold_layer.dim_product_dev (
 
 );
 
+INSERT INTO gold_layer.dim_product_dev(product_id, full_line, version, manufacturer, model, product)
+SELECT
+    d.product_id,
+    d.full_line,
+    d.version,
+    d.manufacturer,
+    d.model,
+    d.product
+FROM silver_layer.dim_product_dev d;
+
 -- Security Layer for table existance checking
 DROP TABLE IF EXISTS gold_layer.dim_team_leaders_status_dev;
 CREATE TABLE gold_layer.dim_team_leaders_status_dev (
@@ -105,6 +142,14 @@ CREATE TABLE gold_layer.dim_team_leaders_status_dev (
     
 );
 
+INSERT INTO gold_layer.dim_team_leaders_status_dev(team_leader_status_id, shift, team_leader, num_operators)
+SELECT
+    d.team_leader_status_id,
+    d.shift,
+    d.team_leader,
+    d.num_operators
+FROM silver_layer.dim_team_leaders_status_dev d;
+
 -- Security Layer for table existance checking
 DROP TABLE IF EXISTS gold_layer.dim_product_details_dev;
 CREATE TABLE gold_layer.dim_product_details_dev (
@@ -115,6 +160,13 @@ CREATE TABLE gold_layer.dim_product_details_dev (
     met_date_created      DATETIME2 DEFAULT GETDATE() -- A metadata column to get the creation date/time
 
 );
+
+INSERT INTO gold_layer.dim_product_details_dev(product_details_id, version, cycle_time)
+SELECT
+    d.product_details_id,
+    d.version,
+    d.cycle_time
+FROM silver_layer.dim_product_details_dev d;
 
 -- Security Layer for table existance checking
 -- fact_breakdown_table_dev is dropped at the top of the script (before the dimensions),
@@ -138,6 +190,31 @@ CREATE TABLE gold_layer.fact_breakdown_table_dev (
     CONSTRAINT FK_fact_breakdown_failure FOREIGN KEY (failure_id) REFERENCES gold_layer.dim_failures_dev (failure_id)
 
 );
+
+INSERT INTO gold_layer.fact_breakdown_table_dev(
+    source_id,
+    date_id,
+    product_id,
+    work_station_id,
+    failure_id, 
+    event_time, 
+    unplanned_downtime, 
+    planned_downtime, 
+    failure_description
+)
+
+SELECT
+    f.source_id,
+    f.date_id,
+    f.product_id,
+    f.work_station_id,
+    f.failure_id,
+    f.event_time,
+    f.unplanned_downtime,
+    f.planned_downtime,
+    f.failure_description
+FROM silver_layer.fact_breakdown_table_dev f;
+
 
 -- Security Layer for table existance checking
 -- fact_status_table_dev is dropped at the top of the script (before the dimensions).
@@ -177,3 +254,138 @@ CREATE TABLE gold_layer.fact_status_table_dev (
     CONSTRAINT FK_fact_status_productdetails FOREIGN KEY (product_details_id) REFERENCES gold_layer.dim_product_details_dev (product_details_id)
 
 );
+
+WITH breakdown_downtime AS (
+    -- Roll downtime up to date + product + shift. The breakdown fact has no shift key,
+    -- so the shift is derived from event_time using fixed windows (convention, not sourced):
+    -- morning 06:00-14:00, afternoon 14:00-22:00, evening 22:00-06:00 (wraps midnight)
+    SELECT
+        bf.date_id,
+        bf.product_id,
+        CASE
+            WHEN bf.event_time >= '06:00:00' AND bf.event_time < '14:00:00' THEN 'morning'
+            WHEN bf.event_time >= '14:00:00' AND bf.event_time < '22:00:00' THEN 'afternoon'
+            ELSE 'evening'   -- 22:00:00-05:59:59
+        END                                   AS shift,
+        SUM(ISNULL(bf.unplanned_downtime, 0)) AS total_unplanned_downtime,
+        SUM(ISNULL(bf.planned_downtime, 0))   AS total_planned_downtime
+    FROM silver_layer.fact_breakdown_table_dev bf
+    GROUP BY
+        bf.date_id,
+        bf.product_id,
+        CASE
+            WHEN bf.event_time >= '06:00:00' AND bf.event_time < '14:00:00' THEN 'morning'
+            WHEN bf.event_time >= '14:00:00' AND bf.event_time < '22:00:00' THEN 'afternoon'
+            ELSE 'evening'
+        END
+),
+
+base AS (
+    SELECT
+        s.source_id,
+        s.date_id,
+        s.product_id,
+        s.team_leader_status_id,
+        s.product_details_id,
+        s.total_expected_output,
+        s.total_produced,
+        s.nok_parts,
+        s.reworked_parts,
+        s.accidents,
+        s.near_accidents,
+        s.customer_complaints,
+        s.all_time,
+        s.observations,
+        pd.cycle_time,
+        ISNULL(bd.total_unplanned_downtime, 0) AS unplanned_downtime,
+        ISNULL(bd.total_planned_downtime, 0)   AS planned_downtime
+    FROM silver_layer.fact_status_table_dev s
+    JOIN silver_layer.dim_product_details_dev pd
+        ON pd.product_details_id = s.product_details_id
+    -- tl carries the status row's shift, which keys the downtime match below.
+    JOIN silver_layer.dim_team_leaders_status_dev tl
+        ON tl.team_leader_status_id = s.team_leader_status_id
+    LEFT JOIN breakdown_downtime bd
+        ON bd.date_id    = s.date_id
+        AND bd.product_id = s.product_id
+        AND bd.shift      = tl.shift
+),
+
+-- Intermediate figures the OEE ratios build on (kept separate so each ratio reads cleanly).
+calc AS (
+    SELECT
+        base.*,
+        (total_produced - nok_parts)                             AS ok_parts,
+        unplanned_downtime                                       AS availability_loss,
+        (all_time - planned_downtime)                            AS planned_production_time,
+        (all_time - planned_downtime - unplanned_downtime)       AS run_time,
+        (all_time - unplanned_downtime - planned_downtime)       AS fully_productive_time
+    FROM base
+),
+
+-- The three OEE ratios; OEE itself is their product.
+metrics AS (
+    SELECT
+        calc.*,
+        CAST(ok_parts AS DECIMAL(6,2)) / NULLIF(total_produced, 0)                 AS quality,
+        (CAST(total_produced AS DECIMAL(6,2)) * cycle_time) / NULLIF(run_time, 0)  AS performance,
+        CAST(run_time AS DECIMAL(6,2)) / NULLIF(planned_production_time, 0)        AS availability
+    FROM calc
+)
+
+INSERT INTO gold_layer.fact_status_table_dev (
+    source_id,
+    date_id,
+    product_id,
+    team_leader_status_id,
+    product_details_id,
+    total_expected_output,
+    total_produced,
+    nok_parts,
+    reworked_parts,
+    accidents,
+    near_accidents,
+    customer_complaints,
+    all_time,
+    observations,
+    ok_parts,
+    quality,
+    planned_production_time,
+    availability_loss,
+    run_time,
+    performance,
+    availability,
+    fully_productive_time,
+    pplh,
+    ok_first_parts,
+    ftq,
+    oee
+)
+    SELECT
+        source_id,
+        date_id,
+        product_id,
+        team_leader_status_id,
+        product_details_id,
+        total_expected_output,
+        total_produced,
+        nok_parts,
+        reworked_parts,
+        accidents,
+        near_accidents,
+        customer_complaints,
+        all_time,
+        observations,
+        ok_parts,
+        quality,
+        planned_production_time,
+        availability_loss,
+        run_time,
+        performance,
+        availability,
+        fully_productive_time,
+        CAST(total_produced AS DECIMAL(6,2)) / NULLIF(fully_productive_time, 0)      AS pplh,
+        (ok_parts - reworked_parts)                                                  AS ok_first_parts,
+        CAST(ok_parts - reworked_parts AS DECIMAL(6,2)) / NULLIF(total_produced, 0)  AS ftq,
+        (availability * performance * quality)                                       AS oee
+    FROM metrics;
