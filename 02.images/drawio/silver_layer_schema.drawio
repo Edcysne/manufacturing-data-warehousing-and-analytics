@@ -1,6 +1,6 @@
 <mxfile host="Electron" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) draw.io/29.0.3 Chrome/140.0.7339.249 Electron/38.7.0 Safari/537.36" version="29.0.3">
   <diagram name="Page-1" id="PWuXOMxi--Wswht6eM4q">
-    <mxGraphModel dx="1188" dy="701" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1600" pageHeight="900" math="0" shadow="0">
+    <mxGraphModel dx="1577" dy="1103" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1600" pageHeight="900" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
@@ -67,7 +67,7 @@
         <mxCell id="sQHuJrsiOPdBF31p__ko-17" value="version" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;fontFamily=Architects Daughter;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DArchitects%2BDaughter;" parent="sQHuJrsiOPdBF31p__ko-11" vertex="1">
           <mxGeometry x="15" y="125.5" width="90" height="30" as="geometry" />
         </mxCell>
-        <mxCell id="eTctZ0fkIRFKq9wjQ5fl-1" value="full_line" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;fontFamily=Architects Daughter;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DArchitects%2BDaughter;" vertex="1" parent="sQHuJrsiOPdBF31p__ko-11">
+        <mxCell id="eTctZ0fkIRFKq9wjQ5fl-1" value="full_line" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;fontFamily=Architects Daughter;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DArchitects%2BDaughter;" parent="sQHuJrsiOPdBF31p__ko-11" vertex="1">
           <mxGeometry x="15" y="45.5" width="90" height="30" as="geometry" />
         </mxCell>
         <mxCell id="sQHuJrsiOPdBF31p__ko-18" style="edgeStyle=orthogonalEdgeStyle;rounded=0;sketch=1;hachureGap=4;jiggle=2;curveFitting=1;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;fontFamily=Architects Daughter;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DArchitects%2BDaughter;" parent="1" target="sQHuJrsiOPdBF31p__ko-6" edge="1">
@@ -235,7 +235,7 @@
           <mxGeometry x="280" y="494.5" width="462.5" height="395.5" as="geometry" />
         </mxCell>
         <mxCell id="OSNRW2SCFtVcGICGRxqp-4" value="fact_status_table" style="swimlane;whiteSpace=wrap;html=1;sketch=1;hachureGap=4;jiggle=2;curveFitting=1;fontFamily=Architects Daughter;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DArchitects%2BDaughter;" parent="1" vertex="1">
-          <mxGeometry x="1070" y="492" width="200" height="310" as="geometry">
+          <mxGeometry x="1070" y="492" width="200" height="318" as="geometry">
             <mxRectangle x="90" y="300" width="140" height="30" as="alternateBounds" />
           </mxGeometry>
         </mxCell>
@@ -277,6 +277,12 @@
         </mxCell>
         <mxCell id="OSNRW2SCFtVcGICGRxqp-11" value="date_id" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;fontFamily=Architects Daughter;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DArchitects%2BDaughter;" parent="OSNRW2SCFtVcGICGRxqp-4" vertex="1">
           <mxGeometry x="10" y="110" width="170" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="e_iaEzSybnNbWnPqrZ48-1" value="all_time" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;fontFamily=Architects Daughter;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DArchitects%2BDaughter;" vertex="1" parent="OSNRW2SCFtVcGICGRxqp-4">
+          <mxGeometry x="55" y="288" width="90" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="e_iaEzSybnNbWnPqrZ48-2" value="" style="shape=cross;whiteSpace=wrap;html=1;strokeColor=none;fillColor=#00CCCC;" vertex="1" parent="OSNRW2SCFtVcGICGRxqp-4">
+          <mxGeometry x="124" y="298" width="13.75" height="13.75" as="geometry" />
         </mxCell>
         <mxCell id="OSNRW2SCFtVcGICGRxqp-16" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=1;entryY=0.25;entryDx=0;entryDy=0;sketch=1;curveFitting=1;jiggle=2;" parent="1" source="sQHuJrsiOPdBF31p__ko-48" target="OSNRW2SCFtVcGICGRxqp-4" edge="1">
           <mxGeometry relative="1" as="geometry">
@@ -402,6 +408,12 @@
         </mxCell>
         <mxCell id="ZMUISxd8wLsVaZGXanIO-10" value="*" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;fontFamily=Architects Daughter;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DArchitects%2BDaughter;" parent="1" vertex="1">
           <mxGeometry x="1280" y="549.5" width="20" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="e_iaEzSybnNbWnPqrZ48-3" value="&lt;b&gt;night shift = &lt;/b&gt;Always 7,5 hours = 450 min&amp;nbsp;&lt;div&gt;&lt;b&gt;morning and afternoon shifts =&lt;/b&gt; Always 8 hours = 480 min&lt;/div&gt;" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;rounded=0;fontFamily=Architects Daughter;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DArchitects%2BDaughter;" vertex="1" parent="1">
+          <mxGeometry x="1250" y="824.5" width="350" height="35" as="geometry" />
+        </mxCell>
+        <mxCell id="e_iaEzSybnNbWnPqrZ48-4" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="e_iaEzSybnNbWnPqrZ48-2" target="e_iaEzSybnNbWnPqrZ48-3">
+          <mxGeometry relative="1" as="geometry" />
         </mxCell>
       </root>
     </mxGraphModel>
