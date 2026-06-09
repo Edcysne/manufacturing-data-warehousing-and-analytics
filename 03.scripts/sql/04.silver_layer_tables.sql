@@ -49,6 +49,7 @@ CREATE TABLE silver_layer.dim_date_dev (
     year_num           INT NOT NULL,
     met_date_created   DATETIME2 DEFAULT GETDATE() -- A metadata column to get the creation date/time
 );
+GO
 
 -- Populating dim_date_dev table
 INSERT INTO silver_layer.dim_date_dev(full_date, day_num, day_name, week_num, month_num, month_name, year_num)
@@ -86,6 +87,7 @@ CREATE TABLE silver_layer.dim_work_stations_dev (
     equipment             VARCHAR(50)  NULL,
     met_date_created      DATETIME2 DEFAULT GETDATE() -- A metadata column to get the creation date/time
 );
+GO
 
 -- Populating dim_work_stations_dev table
 INSERT INTO silver_layer.dim_work_stations_dev(work_station, equipment)
@@ -115,6 +117,7 @@ CREATE TABLE silver_layer.dim_failures_dev (
     met_date_created     DATETIME2 DEFAULT GETDATE() -- A metadata column to get the creation date/time
 
 );
+GO
 
 -- Populating dim_failures_dev table
 INSERT INTO silver_layer.dim_failures_dev (failure_type, sub_code)
@@ -147,6 +150,7 @@ CREATE TABLE silver_layer.dim_product_dev (
     met_date_created   DATETIME2 DEFAULT GETDATE() -- A metadata column to get the creation date/time
 
 );
+GO
 
 /*
 ---------------------------------------------------------------------------------------------
@@ -259,6 +263,7 @@ CREATE TABLE silver_layer.fact_breakdown_table_dev (
     met_date_created     DATETIME2 DEFAULT GETDATE() -- A metadata column to get the creation date/time
 
 );
+GO
 
 -- Populating fact_breakdown_table_dev table
 INSERT INTO silver_layer.fact_breakdown_table_dev (
@@ -310,6 +315,7 @@ CREATE TABLE silver_layer.dim_team_leaders_status_dev (
     all_time                INT NOT NULL,
     met_date_created        DATETIME2 DEFAULT GETDATE() -- A metadata column to get the creation date/time
 );
+GO
 
 -- Populating dim_team_leaders_status_dev table
 INSERT INTO silver_layer.dim_team_leaders_status_dev (shift, team_leader, num_operators, all_time)
@@ -353,6 +359,7 @@ CREATE TABLE silver_layer.dim_product_details_dev (
     met_date_created      DATETIME2 DEFAULT GETDATE() -- A metadata column to get the creation date/time
 
 );
+GO
 
 -- Populating dim_product_details_dev table
 INSERT INTO silver_layer.dim_product_details_dev (version, cycle_time)
@@ -410,6 +417,7 @@ CREATE TABLE silver_layer.fact_status_table_dev (
     observations            VARCHAR(MAX) NULL,
     met_date_created        DATETIME2 DEFAULT GETDATE() -- A metadata column to get the creation date/time
 );
+GO
 
 -- Populating fact_status_table_dev table
 INSERT INTO silver_layer.fact_status_table_dev (

@@ -24,12 +24,12 @@ BEGIN
         -- Start & End time to get the loading time in seconds
         SET @start_time = GETDATE()
         BULK INSERT bronze_layer.wel_breakdown_data
-        FROM 'C:\Users\amcys\Documents\02.Education\01.Online Education\05.projects\data_warehousing\00.bulk_insert_data\wel_breakdown_data.csv'
+        FROM 'C:\Users\amcys\Documents\02.Education\01.Online Education\05.projects\manufacturing_data_warehousing\00.bulk_insert_data\wel_breakdown_data.csv'
         WITH (
             FORMAT = 'CSV',
             FIRSTROW = 2,
             FIELDTERMINATOR = ',',
-            ROWTERMINATOR = '0x0d0a', -- When using Linux use 0x0a, Windows use 0x0d0a
+            ROWTERMINATOR = '0x0a', -- If it fails, try 0x0d0a or /n
             TABLOCK
         );
         SET @end_time = GETDATE()
@@ -44,12 +44,12 @@ BEGIN
         PRINT'===============================';
         SET @start_time = GETDATE()
         BULK INSERT bronze_layer.wel_status_data
-        FROM 'C:\Users\amcys\Documents\02.Education\01.Online Education\05.projects\data_warehousing\00.bulk_insert_data\wel_status_data.csv'
+        FROM 'C:\Users\amcys\Documents\02.Education\01.Online Education\05.projects\manufacturing_data_warehousing\00.bulk_insert_data\wel_status_data.csv'
         WITH(
             FORMAT = 'CSV',
             FIRSTROW = 2,
             FIELDTERMINATOR = ',',
-            ROWTERMINATOR = '0x0d0a',
+            ROWTERMINATOR = '0x0a', -- If it fails, try 0x0d0a or /n
             TABLOCK
         );
         SET @end_time = GETDATE()

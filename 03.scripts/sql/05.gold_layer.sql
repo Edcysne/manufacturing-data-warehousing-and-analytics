@@ -328,7 +328,7 @@ metrics AS (
     SELECT
         calc.*,
         CAST(ok_parts AS DECIMAL(6,2)) / NULLIF(total_produced, 0)                 AS quality,
-        (CAST(total_produced AS DECIMAL(6,2)) * cycle_time) / NULLIF(run_time, 0)  AS performance,
+        (CAST(total_produced AS DECIMAL(6,2)) * (cycle_time/60)) / NULLIF(run_time, 0)  AS performance,
         CAST(run_time AS DECIMAL(6,2)) / NULLIF(planned_production_time, 0)        AS availability
     FROM calc
 )
