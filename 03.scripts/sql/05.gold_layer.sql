@@ -47,23 +47,16 @@ dimension could not be dropped while a FK from a fact still
 referenced it. Harmless for views, kept for safe migration.
 ==============================================================
 */
+
 DROP VIEW  IF EXISTS gold_layer.fact_status_table_dev;
-DROP TABLE IF EXISTS gold_layer.fact_status_table_dev;
 DROP VIEW  IF EXISTS gold_layer.fact_breakdown_table_dev;
-DROP TABLE IF EXISTS gold_layer.fact_breakdown_table_dev;
 
 DROP VIEW  IF EXISTS gold_layer.dim_date_dev;
-DROP TABLE IF EXISTS gold_layer.dim_date_dev;
 DROP VIEW  IF EXISTS gold_layer.dim_work_stations_dev;
-DROP TABLE IF EXISTS gold_layer.dim_work_stations_dev;
 DROP VIEW  IF EXISTS gold_layer.dim_failures_dev;
-DROP TABLE IF EXISTS gold_layer.dim_failures_dev;
 DROP VIEW  IF EXISTS gold_layer.dim_product_dev;
-DROP TABLE IF EXISTS gold_layer.dim_product_dev;
 DROP VIEW  IF EXISTS gold_layer.dim_team_leaders_status_dev;
-DROP TABLE IF EXISTS gold_layer.dim_team_leaders_status_dev;
 DROP VIEW  IF EXISTS gold_layer.dim_product_details_dev;
-DROP TABLE IF EXISTS gold_layer.dim_product_details_dev;
 GO
 
 /*
@@ -71,6 +64,7 @@ GO
                 GOLD LAYER DATE DIM VIEW
 ==============================================================
 */
+
 CREATE VIEW gold_layer.dim_date_dev AS
 SELECT
     d.date_id,
@@ -89,6 +83,7 @@ GO
             GOLD LAYER WORK STATIONS DIM VIEW
 ==============================================================
 */
+
 CREATE VIEW gold_layer.dim_work_stations_dev AS
 SELECT
     d.work_station_id,
@@ -102,6 +97,7 @@ GO
             GOLD LAYER FAILURES DIM VIEW
 ==============================================================
 */
+
 CREATE VIEW gold_layer.dim_failures_dev AS
 SELECT
     d.failure_id,
@@ -115,6 +111,7 @@ GO
             GOLD LAYER PRODUCT DIM VIEW
 ==============================================================
 */
+
 CREATE VIEW gold_layer.dim_product_dev AS
 SELECT
     d.product_id,
@@ -131,6 +128,7 @@ GO
             GOLD LAYER TEAM LEADER STATUS DIM VIEW
 ==============================================================
 */
+
 CREATE VIEW gold_layer.dim_team_leaders_status_dev AS
 SELECT
     d.team_leader_status_id,
@@ -145,6 +143,7 @@ GO
             GOLD LAYER PRODUCT DETAILS DIM VIEW
 ==============================================================
 */
+
 CREATE VIEW gold_layer.dim_product_details_dev AS
 SELECT
     d.product_details_id,
@@ -158,6 +157,7 @@ GO
             GOLD LAYER BREAKDOWN FACT VIEW
 ==============================================================
 */
+
 CREATE VIEW gold_layer.fact_breakdown_table_dev AS
 SELECT
     f.source_id,
@@ -181,6 +181,7 @@ columns are CAST to DECIMAL(9,4) for clean presentation; as a
 view there is no storage type to overflow.
 ==============================================================
 */
+
 CREATE VIEW gold_layer.fact_status_table_dev AS
 WITH breakdown_downtime AS (
     -- Roll downtime up to date + product + shift. The breakdown fact has no shift key,
@@ -254,9 +255,9 @@ calc AS (
 metrics AS (
     SELECT
         calc.*,
-        CAST(CAST(ok_parts AS DECIMAL(9,4)) / NULLIF(total_produced, 0)                AS DECIMAL(9,4)) AS quality,
+        CAST(CAST(ok_parts AS DECIMAL(9,4)) / NULLIF(total_produced, 0)                     AS DECIMAL(9,4)) AS quality,
         CAST((CAST(total_produced AS DECIMAL(9,4)) * (cycle_time/60)) / NULLIF(run_time, 0) AS DECIMAL(9,4)) AS performance,
-        CAST(CAST(run_time AS DECIMAL(9,4)) / NULLIF(planned_production_time, 0)        AS DECIMAL(9,4)) AS availability
+        CAST(CAST(run_time AS DECIMAL(9,4)) / NULLIF(planned_production_time, 0)            AS DECIMAL(9,4)) AS availability
     FROM calc
 )
 

@@ -1,3 +1,8 @@
+-- ============================================================
+-- HELPER SCRIPTS
+-- Reusable SQL snippets for common schema maintenance tasks.
+-- ============================================================
+
 -- Code snippet to rename a table column
 EXEC sp_rename 'silver_layer.fact_breakdown_table.event_time', 'duration', 'COLUMN';
 

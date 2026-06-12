@@ -1,3 +1,8 @@
+-- ============================================================
+-- SILVER LAYER - DQL HELPER QUERIES
+-- Ad-hoc SELECT queries used to inspect and validate the silver layer.
+-- ============================================================
+
 -- Used to check the missing rows.
 -- Everything that is on the bronze layer and not on the silver layer,
 SELECT bf.*

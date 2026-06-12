@@ -25,4 +25,4 @@ git diff
 
 # Claude files 
 *.claude
-.claude/
+.claude/00.bulk_insert_data/*.csv
