@@ -31,7 +31,63 @@ STARTED:    25/05/2026
 
 /*
 ==============================================================
-                SILVER LAYER DATE DIM TABLE
+                    0.1 STAGING FACT TABLE
+==============================================================
+*/
+
+-- Staging cleaned breakdown data
+-- The staging serves as a single source of truth
+-- Where all the data that will go to the dim_tables, will be cleaned and temporarily stored here
+DROP TABLE IF EXISTS silver_layer.stg_breakdown;
+SELECT
+    b.ID                                               AS source_id,
+    CONVERT(date, b.[date], 103)                       AS full_date,
+    ISNULL(NULLIF(TRIM(b.work_station), ''), 'N/A')    AS work_station,
+    ISNULL(NULLIF(TRIM(b.equipment),    ''), 'N/A')    AS equipment,
+    ISNULL(NULLIF(TRIM(b.failure_type), ''), 'N/A')    AS failure_type,
+    ISNULL(NULLIF(TRIM(b.sub_code),     ''), 'N/A')    AS sub_code,
+    TRIM(b.line)                                       AS full_line,
+    b.event_time,
+    b.unplanned_downtime,
+    b.planned_downtime,
+    b.failure_description
+INTO silver_layer.stg_breakdown
+FROM bronze_layer.wel_breakdown_data b;
+GO
+
+/*
+==============================================================
+                    0.2 STAGING STATUS TABLE
+==============================================================
+*/
+DROP TABLE IF EXISTS silver_layer.stg_status;
+SELECT
+    b.ID                                               AS source_id,
+    CONVERT(date, b.[date], 103)                       AS full_date,
+    TRIM(b.line)                                       AS full_line,
+    REPLACE(TRIM(b.shift), 'night', 'evening')         AS shift,
+    TRIM(b.team_leader)                                AS team_leader,
+    b.num_operators,
+    CASE WHEN TRIM(b.shift) = 'night' THEN 450 ELSE 480 END AS all_time,
+    b.total_expected_output,
+    b.total_produced,
+    b.nok_parts,
+    b.reworked_parts,
+    b.accidents,
+    b.near_accidents,
+    b.customer_complaints,
+    -- collapse repeated whitespaces:
+    REPLACE(REPLACE(REPLACE(TRIM(b.observations), ' ', '<>'), '><', ''), '<>', ' ') AS observations,
+    b.version,
+    b.cycle_time
+INTO silver_layer.stg_status
+FROM bronze_layer.wel_status_data b;
+GO
+
+
+/*
+==============================================================
+            1.SILVER LAYER DATE DIM TABLE
 ==============================================================
 */
 
@@ -62,20 +118,21 @@ SELECT
     DATENAME(month, d.full_date),
     DATEPART(year, d.full_date)
 FROM (
-    SELECT DISTINCT CONVERT(date, b.[date], 103) AS full_date
-    FROM bronze_layer.wel_breakdown_data b
-    WHERE b.[date] IS NOT NULL
-
-    UNION  -- de-dupes across both
-
-    SELECT DISTINCT CONVERT(date, s.[date], 103) AS full_date
-    FROM bronze_layer.wel_status_data s
-    WHERE s.[date] IS NOT NULL
+    SELECT full_date FROM silver_layer.stg_breakdown WHERE full_date IS NOT NULL
+    UNION -- UNION automatically drops the duplicates
+    SELECT full_date FROM silver_layer.stg_status WHERE full_date IS NOT NULL
 ) d;
+
+-- Nonclustered Index so it can be faster for the joins
+-- I use the full_date for the joins in all fact tables
+CREATE UNIQUE NONCLUSTERED INDEX ux_dim_date_dev_full_date 
+ON silver_layer.dim_date_dev(full_date)
+GO
+
 
 /*
 ==============================================================
-            SILVER LAYER WORK STATIONS DIM TABLE
+            2.SILVER LAYER WORK STATIONS DIM TABLE
 ==============================================================
 */
 
@@ -84,63 +141,53 @@ DROP TABLE IF EXISTS silver_layer.dim_work_stations_dev;
 CREATE TABLE silver_layer.dim_work_stations_dev (
     work_station_id       INT IDENTITY(1,1) PRIMARY KEY,
     work_station          VARCHAR(50) NOT NULL,
-    equipment             VARCHAR(50)  NULL,
+    equipment             VARCHAR(50) NOT NULL,
     met_date_created      DATETIME2 DEFAULT GETDATE() -- A metadata column to get the creation date/time
 );
 GO
 
 -- Populating dim_work_stations_dev table
 INSERT INTO silver_layer.dim_work_stations_dev(work_station, equipment)
-    SELECT DISTINCT
-        TRIM(b.work_station),
-        TRIM(b.equipment)
-    FROM bronze_layer.wel_breakdown_data b
-    WHERE b.[work_station] IS NOT NULL;
+SELECT DISTINCT work_station, equipment
+FROM silver_layer.stg_breakdown b;
 
--- Handle NULL Values
-INSERT INTO silver_layer.dim_work_stations_dev(work_station, equipment)
-VALUES('N/A', 'N/A');
-
+CREATE UNIQUE NONCLUSTERED INDEX ux_dim_work_stations_dev_work_station
+ON silver_layer.dim_work_stations_dev(work_station, equipment)
+GO
 /*
 ==============================================================
-            SILVER LAYER FAILURES DIM TABLE
+            3.SILVER LAYER FAILURES DIM TABLE
 ==============================================================
 */
 
 -- Security Layer for table existance checking
 DROP TABLE IF EXISTS silver_layer.dim_failures_dev;
 CREATE TABLE silver_layer.dim_failures_dev (
-    
     failure_id           INT IDENTITY(1,1) PRIMARY KEY,
     failure_type         VARCHAR(50) NOT NULL,
-    sub_code             VARCHAR(50) NULL,
+    sub_code             VARCHAR(50) NOT NULL,
     met_date_created     DATETIME2 DEFAULT GETDATE() -- A metadata column to get the creation date/time
-
 );
 GO
 
 -- Populating dim_failures_dev table
 INSERT INTO silver_layer.dim_failures_dev (failure_type, sub_code)
-    SELECT DISTINCT
-        TRIM(b.failure_type),
-        TRIM(b.sub_code)
-    FROM bronze_layer.wel_breakdown_data b
-    WHERE b.[failure_type] IS NOT NULL;
+SELECT DISTINCT failure_type, sub_code
+FROM silver_layer.stg_breakdown;
 
--- Handle NULL Values
-INSERT INTO silver_layer.dim_failures_dev (failure_type, sub_code)
-VALUES('N/A', 'N/A');
+CREATE UNIQUE NONCLUSTERED INDEX ux_dim_failures_dev_failure_type
+    ON silver_layer.dim_failures_dev (failure_type, sub_code);
+GO
 
 /*
 ==============================================================
-            SILVER LAYER PRODUCT DIM TABLE
+            4.SILVER LAYER PRODUCT DIM TABLE
 ==============================================================
 */
 
 -- Security Layer for table existance checking
 DROP TABLE IF EXISTS silver_layer.dim_product_dev;
 CREATE TABLE silver_layer.dim_product_dev (
-
     product_id         INT IDENTITY(1,1) PRIMARY KEY,
     full_line          VARCHAR(100) NOT NULL, 
     version            VARCHAR(10)  NULL,
@@ -148,7 +195,6 @@ CREATE TABLE silver_layer.dim_product_dev (
     model              VARCHAR(50)  NULL,
     product            VARCHAR(50)  NULL,
     met_date_created   DATETIME2 DEFAULT GETDATE() -- A metadata column to get the creation date/time
-
 );
 GO
 
@@ -181,18 +227,16 @@ Created first a CTE using CASE WHEN to separate the product
 Then I use a CTE to separate the manufacturer and model from the main string
 */
 
+-- Asingle column with all the lines
 WITH all_lines AS (
-    SELECT DISTINCT TRIM(line) AS line
-    FROM bronze_layer.wel_breakdown_data
-    WHERE line IS NOT NULL
-
-    UNION   -- UNION (not UNION ALL) de-dupes across both tables
-
-    SELECT DISTINCT TRIM(line) AS line
-    FROM bronze_layer.wel_status_data
-    WHERE line IS NOT NULL
+    SELECT full_line AS line FROM silver_layer.stg_breakdown
+    WHERE full_line IS NOT NULL
+    UNION
+    SELECT full_line AS line FROM silver_layer.stg_status
+    WHERE full_line IS NOT NULL
 ),
 
+-- The convertion part
 line_product AS (
     SELECT
         al.line,
@@ -213,6 +257,7 @@ line_product AS (
     FROM all_lines al
 ),
 
+
 parsed AS (
     SELECT
         lp.line,
@@ -230,78 +275,25 @@ parsed AS (
 
 -- Populating dim_product_dev table
 INSERT INTO silver_layer.dim_product_dev (full_line, version, manufacturer, model, product)
-    SELECT
-        p.line,
-        TRIM(LEFT(p.line, CHARINDEX(' ', p.line) - 1)) AS version,
-        TRIM(LEFT(p.mfr_and_model, CHARINDEX(' ', p.mfr_and_model) - 1)) AS manufacturer,
-        SUBSTRING(
-            p.mfr_and_model,
-            CHARINDEX(' ', p.mfr_and_model) + 1,
-            LEN(p.mfr_and_model) - CHARINDEX(' ', p.mfr_and_model)
-        ) AS model,
-        p.product
-    FROM parsed p;
+SELECT
+    p.line,
+    TRIM(LEFT(p.line, CHARINDEX(' ', p.line) - 1)) AS version,
+    TRIM(LEFT(p.mfr_and_model, CHARINDEX(' ', p.mfr_and_model) - 1)) AS manufacturer,
+    SUBSTRING(
+        p.mfr_and_model,
+        CHARINDEX(' ', p.mfr_and_model) + 1,
+        LEN(p.mfr_and_model) - CHARINDEX(' ', p.mfr_and_model)
+    ) AS model,
+    p.product
+FROM parsed p;
 
-/*
-==============================================================
-            SILVER LAYER BREAKDOWN FACT TABLE
-==============================================================
-*/
-
--- Security Layer for table existance checking
-DROP TABLE IF EXISTS silver_layer.fact_breakdown_table_dev;
-CREATE TABLE silver_layer.fact_breakdown_table_dev (
-    source_id            VARCHAR(250) PRIMARY KEY,
-    date_id              INT NOT NULL,
-    product_id           INT NOT NULL,
-    work_station_id      INT NOT NULL,
-    failure_id           INT NOT NULL,
-    event_time           TIME(0) NOT NULL,
-    unplanned_downtime   INT NULL,
-    planned_downtime     INT NULL,
-    failure_description  VARCHAR(MAX),
-    met_date_created     DATETIME2 DEFAULT GETDATE() -- A metadata column to get the creation date/time
-
-);
+CREATE UNIQUE NONCLUSTERED INDEX ux_dim_product_full_line
+    ON silver_layer.dim_product_dev (full_line);
 GO
 
--- Populating fact_breakdown_table_dev table
-INSERT INTO silver_layer.fact_breakdown_table_dev (
-    source_id, 
-    date_id, 
-    product_id, 
-    work_station_id, 
-    failure_id,
-    event_time,
-    unplanned_downtime,
-    planned_downtime,
-    failure_description
-)
-    SELECT DISTINCT 
-        b.ID,
-        dt.date_id,
-        p.product_id,
-        ws.work_station_id,
-        f.failure_id,
-        b.event_time,
-        b.unplanned_downtime,
-        b.planned_downtime,
-        b.failure_description
-    FROM bronze_layer.wel_breakdown_data b 
-    JOIN silver_layer.dim_date_dev dt 
-        ON dt.full_date = CONVERT(date, b.[date], 103)
-    JOIN silver_layer.dim_work_stations_dev ws
-        ON ISNULL(NULLIF(ws.work_station,''),'N/A') = ISNULL(NULLIF(TRIM(b.work_station),''),'N/A')
-        AND ISNULL(NULLIF(ws.equipment, ''),'N/A') = ISNULL(NULLIF(TRIM(b.equipment), ''),'N/A')
-    JOIN silver_layer.dim_failures_dev f 
-        ON ISNULL(NULLIF(f.failure_type,''), 'N/A') = ISNULL(NULLIF(TRIM(b.failure_type),''),'N/A')
-        AND ISNULL(NULLIF(f.sub_code, ''),'N/A') = ISNULL(NULLIF(TRIM(b.sub_code), ''),'N/A')
-    JOIN silver_layer.dim_product_dev p
-        ON p.full_line = TRIM(b.line);
-
 /*
 ==============================================================
-            SILVER LAYER TEAM LEADER STATUS DIM TABLE
+            5.SILVER LAYER TEAM LEADER STATUS DIM TABLE
 ==============================================================
 */
 
@@ -319,34 +311,19 @@ GO
 
 -- Populating dim_team_leaders_status_dev table
 INSERT INTO silver_layer.dim_team_leaders_status_dev (shift, team_leader, num_operators, all_time)
-    SELECT DISTINCT
-        REPLACE(TRIM(b.shift), 'night', 'evening') AS shift,
-        TRIM(b.team_leader),
-        b.num_operators,
-        CASE
-            WHEN TRIM(b.shift) = 'night' THEN 450
-            ELSE 480
-        END AS all_time
-    FROM bronze_layer.wel_status_data b
-    WHERE b.shift IS NOT NULL
-        AND b.team_leader IS NOT NULL
-        AND b.num_operators IS NOT NULL;
+SELECT DISTINCT shift,team_leader,num_operators,all_time
+FROM silver_layer.stg_status
+WHERE shift IS NOT NULL
+  AND team_leader IS NOT NULL
+  AND num_operators IS NOT NULL;
 
-/*
-==============================================================================================================
-                                            SILVER LAYER DAY STATUS DIM TABLE
-
-Observation problem solution:
-Observation: "my     name is eduardo         and I love    dogs  a lot"
-    1. REPLACE(text, ' ', '<>'): my<><><><><>name<>is<>eduardo<><><><><><><><><>and<>I<>love<><><><>dogs<><>a<>lot
-    2. REPLACE(..., '><', ''): my<>name<>is<>eduardo<>and<>I<>love<>dogs<>a<>lot
-    3. REPLACE(..., '<>', ' '): my name is eduardo and I love dogs a lot
-=============================================================================================================
-*/
+CREATE UNIQUE NONCLUSTERED INDEX ux_dim_tls_natkey
+    ON silver_layer.dim_team_leaders_status_dev (team_leader, shift, num_operators);
+GO
 
 /*
 ==============================================================
-            SILVER LAYER PRODUCT DETAILS DIM TABLE
+            6.SILVER LAYER PRODUCT DETAILS DIM TABLE
 ==============================================================
 */
 
@@ -357,117 +334,125 @@ CREATE TABLE silver_layer.dim_product_details_dev (
     version               VARCHAR(25) NOT NULL,
     cycle_time            DECIMAL(5,2) NOT NULL,
     met_date_created      DATETIME2 DEFAULT GETDATE() -- A metadata column to get the creation date/time
-
 );
 GO
 
 -- Populating dim_product_details_dev table
 INSERT INTO silver_layer.dim_product_details_dev (version, cycle_time)
-    SELECT DISTINCT
-        b.version,
-        b.cycle_time
-    FROM bronze_layer.wel_status_data b
-    WHERE b.version IS NOT NULL
-        AND b.cycle_time IS NOT NULL;
+SELECT DISTINCT version, cycle_time
+FROM silver_layer.stg_status
+WHERE version IS NOT NULL
+    AND cycle_time IS NOT NULL;
+
+CREATE UNIQUE NONCLUSTERED INDEX ux_dim_pd_natkey
+    ON silver_layer.dim_product_details_dev (version, cycle_time);
+GO
 
 /*
 ==============================================================
-            SILVER LAYER STATUS FACT TABLE
-
-CREATE TABLE bronze_layer.wel_status_data (
-
-    ID                          VARCHAR(250) PRIMARY KEY,
-    date                        DATE,
-    line                        VARCHAR(100), 
-    shift                       VARCHAR(10),
-    team_leader                 VARCHAR(30),
-    num_operators               INT,
-    total_expected_output       INT,
-    total_produced              INT,
-    nok_parts                   INT,
-    reworked_parts              INT,
-    accidents                   INT,
-    near_accidents              INT,
-    customer_complaints         INT,
-    observations                VARCHAR(MAX),
-    version                     VARCHAR(25),
-    cycle_time                  DECIMAL(5,2)
-
-);
-
+            7.SILVER LAYER BREAKDOWN FACT TABLE
 ==============================================================
 */
 
 -- Security Layer for table existance checking
-DROP TABLE IF EXISTS silver_layer.fact_status_table_dev;
-CREATE TABLE silver_layer.fact_status_table_dev (
-    source_id               VARCHAR(250) PRIMARY KEY,
-    date_id                 INT NOT NULL,
-    product_id              INT NOT NULL,
-    team_leader_status_id   INT NOT NULL,
-    product_details_id      INT NOT NULL,
-    total_expected_output   INT NULL,
-    total_produced          INT NULL,
-    nok_parts               INT NULL,
-    reworked_parts          INT NULL,
-    accidents               INT NULL,
-    near_accidents          INT NULL,
-    customer_complaints     INT NULL,
-    all_time                INT NULL,
-    observations            VARCHAR(MAX) NULL,
-    met_date_created        DATETIME2 DEFAULT GETDATE() -- A metadata column to get the creation date/time
-);
+DROP TABLE IF EXISTS silver_layer.fact_breakdown_table_dev;
+SELECT
+    s.source_id,
+    dt.date_id,
+    p.product_id,
+    ws.work_station_id,
+    f.failure_id,
+    s.event_time,
+    s.unplanned_downtime,
+    s.planned_downtime,
+    s.failure_description,
+    CAST(SYSDATETIME() AS DATETIME2) AS met_date_created
+INTO silver_layer.fact_breakdown_table_dev
+FROM silver_layer.stg_breakdown s
+JOIN silver_layer.dim_date_dev dt 
+    ON dt.full_date = s.full_date
+JOIN silver_layer.dim_work_stations_dev ws 
+    ON ws.work_station = s.work_station
+    AND ws.equipment = s.equipment
+JOIN silver_layer.dim_failures_dev f 
+    ON f.failure_type = s.failure_type
+    AND f.sub_code = s.sub_code
+JOIN silver_layer.dim_product_dev p 
+    ON p.full_line = s.full_line;
+GO;
+
+-- Keys AFTER the load: clustered index FIRST, then the nonclustered PK
+-- (otherwise the PK would be rebuilt when the clustered index is added).
+ALTER TABLE silver_layer.fact_breakdown_table_dev
+    ALTER COLUMN source_id VARCHAR(250) NOT NULL;
+ 
+CREATE CLUSTERED INDEX cx_fact_breakdown_date
+    ON silver_layer.fact_breakdown_table_dev (date_id);
+ 
+ALTER TABLE silver_layer.fact_breakdown_table_dev
+    ADD CONSTRAINT pk_fact_breakdown_dev PRIMARY KEY NONCLUSTERED (source_id);
+ 
+ALTER TABLE silver_layer.fact_breakdown_table_dev
+    ADD CONSTRAINT df_fact_breakdown_metdate DEFAULT GETDATE() FOR met_date_created;
 GO
 
--- Populating fact_status_table_dev table
-INSERT INTO silver_layer.fact_status_table_dev (
-    source_id,
-    date_id,
-    product_id,
-    team_leader_status_id,
-    product_details_id,
-    total_expected_output,
-    total_produced,
-    nok_parts,
-    reworked_parts,
-    accidents,
-    near_accidents,
-    customer_complaints,
-    all_time,
-    observations
-)
-
 /*
-Observation: "my     name is eduardo         and I love    dogs  a lot"
-    1. REPLACE(text, ' ', '<>'): my<><><><><>name<>is<>eduardo<><><><><><><><><>and<>I<>love<><><><>dogs<><>a<>lot
-    2. REPLACE(..., '><', ''): my<>name<>is<>eduardo<>and<>I<>love<>dogs<>a<>lot
-    3. REPLACE(..., '<>', ' '): my name is eduardo and I love dogs a lot
+==============================================================
+            8.SILVER LAYER STATUS FACT TABLE
+==============================================================
 */
 
-    SELECT DISTINCT
-        b.ID,
-        dt.date_id,
-        p.product_id,
-        tl.team_leader_status_id,
-        pd.product_details_id,
-        b.total_expected_output,
-        b.total_produced,
-        b.nok_parts,
-        b.reworked_parts,
-        b.accidents,
-        b.near_accidents,
-        b.customer_complaints,
-        tl.all_time,
-        REPLACE(REPLACE(REPLACE(TRIM(b.observations), ' ', '<>'), '><', ''), '<>', ' ') AS observations
-    FROM bronze_layer.wel_status_data b
-    JOIN silver_layer.dim_date_dev dt
-        ON dt.full_date = CONVERT(date, b.[date], 103)
-    JOIN silver_layer.dim_product_dev p
-        ON p.full_line = TRIM(b.line)
-    JOIN silver_layer.dim_team_leaders_status_dev tl
-        ON tl.team_leader = TRIM(b.team_leader)
-        AND tl.shift = REPLACE(TRIM(b.shift), 'night', 'evening')
-        AND tl.num_operators = b.num_operators
-    JOIN silver_layer.dim_product_details_dev pd
-        ON ISNULL(pd.version,'') = ISNULL(b.version,'') -- NULL != NULL, but '' = ''
-        AND pd.cycle_time = b.cycle_time;
+DROP TABLE IF EXISTS silver_layer.fact_status_table_dev;
+SELECT
+    s.source_id,
+    dt.date_id,
+    p.product_id,
+    tl.team_leader_status_id,
+    pd.product_details_id,
+    s.total_expected_output,
+    s.total_produced,
+    s.nok_parts,
+    s.reworked_parts,
+    s.accidents,
+    s.near_accidents,
+    s.customer_complaints,
+    tl.all_time,
+    s.observations,
+    CAST(SYSDATETIME() AS DATETIME2) AS met_date_created
+INTO silver_layer.fact_status_table_dev
+FROM silver_layer.stg_status s
+JOIN silver_layer.dim_date_dev dt 
+    ON dt.full_date = s.full_date
+JOIN silver_layer.dim_product_dev p 
+    ON p.full_line = s.full_line
+JOIN silver_layer.dim_team_leaders_status_dev tl 
+    ON tl.team_leader = s.team_leader
+    AND tl.shift = s.shift
+    AND tl.num_operators = s.num_operators
+JOIN silver_layer.dim_product_details_dev pd 
+    ON pd.version = s.version
+    AND pd.cycle_time = s.cycle_time;
+
+GO
+ 
+ALTER TABLE silver_layer.fact_status_table_dev
+    ALTER COLUMN source_id VARCHAR(250) NOT NULL;
+ 
+CREATE CLUSTERED INDEX cx_fact_status_date
+    ON silver_layer.fact_status_table_dev (date_id);
+ 
+ALTER TABLE silver_layer.fact_status_table_dev
+    ADD CONSTRAINT pk_fact_status_dev PRIMARY KEY NONCLUSTERED (source_id);
+ 
+ALTER TABLE silver_layer.fact_status_table_dev
+    ADD CONSTRAINT df_fact_status_metdate DEFAULT GETDATE() FOR met_date_created;
+
+GO
+
+/*
+==============================================================
+            9.SILVER LAYER STATUS FACT TABLE
+==============================================================
+*/
+DROP TABLE IF EXISTS silver_layer.stg_breakdown;
+DROP TABLE IF EXISTS silver_layer.stg_status;
