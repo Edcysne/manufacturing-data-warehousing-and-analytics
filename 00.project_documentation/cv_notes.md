@@ -1,0 +1,1 @@
+1 - Improved silver layer performance with CTEs and INDEXES, reducing loading time of more than 8 million rows of data from 57 minutes to only 3 minutes;
