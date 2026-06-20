@@ -71,3 +71,15 @@ SELECT *
 FROM [db_manufacturing_warehouse].[gold_layer].[fact_status_table_dev]
 WHERE performance > 0 AND oee > 1
 ORDER BY performance ASC;
+
+-- Script that I used to check all the data that was not included in the fact_status_table_dev
+SELECT a.*
+FROM [db_manufacturing_warehouse].[gold_layer].[fact_status_enriched_dev] AS a
+LEFT OUTER JOIN [db_manufacturing_warehouse].[gold_layer].[fact_status_table_dev] AS b
+    ON a.[your_key_column] = b.[your_key_column]
+WHERE b.[your_key_column] IS NULL;
+
+-- Counting the rows of each table to check if any was dropped
+SELECT COUNT(*) AS enriched_rows FROM gold_layer.fact_status_enriched_dev;
+SELECT COUNT(*) AS table_rows    FROM gold_layer.fact_status_table_dev;
+SELECT COUNT(*) AS trash_rows    FROM gold_layer.fact_status_trash_dev;

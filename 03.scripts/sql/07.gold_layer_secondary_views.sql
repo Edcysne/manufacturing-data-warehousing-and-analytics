@@ -41,13 +41,14 @@ GO
 
 CREATE VIEW gold_layer.fact_status_trash_dev AS
 SELECT
-    *,
-    CASE WHEN run_time < 0         THEN 1 ELSE 0 END AS flag_negative_run_time,
-    CASE WHEN performance >= 1.1496 THEN 1 ELSE 0 END AS flag_performance_over_tolerance
-FROM gold_layer.fact_status_enriched_dev
-WHERE run_time < 0 
-    OR (performance >= 1.1496 AND oee >= 1)
-    OR (run_time = 0 AND (ok_parts > 0 OR nok_parts > 0));
+    *
+FROM [db_manufacturing_warehouse].[gold_layer].[fact_status_enriched_dev]
+WHERE run_time < 0
+   OR run_time IS NULL
+   OR performance > 1.1496 
+   OR performance IS NULL
+   OR oee > 1 
+   OR oee IS NULL;
 GO
 
 /*
@@ -57,8 +58,6 @@ GO
 */
 
 CREATE VIEW gold_layer.fact_status_table_dev AS
-SELECT * FROM gold_layer.fact_status_enriched_dev
-WHERE run_time >= 0                                                -- NOT rule A (negative run_time)
-    AND (run_time = 0 OR NOT (performance >= 1.1496 AND oee >= 1)) -- NOT rule B (perf over tolerance)
-    AND NOT (run_time = 0 AND (ok_parts > 0 OR nok_parts > 0));    -- NOT rule C (zero runtime w/ parts)
+SELECT * FROM [db_manufacturing_warehouse].[gold_layer].[fact_status_enriched_dev]
+WHERE run_time >= 0 AND performance <= 1.1496 AND oee <= 1                                    
 GO
