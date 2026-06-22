@@ -12,6 +12,8 @@ This document describes the dashboards to be built and the requirements requeste
 | 4 | 5 Cards (or similar visuals) | Display **Performance, Availability, Quality, PPLH, FTQ and Scrap Costs**. |
 | 5 | Column chart | **Total scrap per product**, with a parameter filter to switch the x-axis between *Team Leader*, *Shift* and *Product*. |
 
+The content of the Overview Report must be filterable by **day, week, month, quarter and year**.
+
 ## 2. Breakdown Report
 
 | # | Visual | Description |
