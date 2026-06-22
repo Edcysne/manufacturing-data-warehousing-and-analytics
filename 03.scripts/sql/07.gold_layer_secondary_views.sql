@@ -52,9 +52,10 @@ STARTED:    06/19/2026
 */
 
 DROP VIEW  IF EXISTS gold_layer.fact_status_trash_dev;
+DROP VIEW  IF EXISTS gold_layer.fact_status_trash_final_dev;
 DROP VIEW  IF EXISTS gold_layer.fact_status_table_dev;
-
 DROP VIEW  IF EXISTS gold_layer.fact_breakdown_final_dev;
+
 DROP VIEW  IF EXISTS gold_layer.dim_date_final_dev;
 DROP VIEW  IF EXISTS gold_layer.dim_work_stations_final_dev;
 DROP VIEW  IF EXISTS gold_layer.dim_failures_final_dev;
@@ -63,7 +64,7 @@ DROP VIEW  IF EXISTS gold_layer.dim_team_leaders_status_final_dev;
 DROP VIEW  IF EXISTS gold_layer.dim_product_details_final_dev;
 GO
 
-CREATE VIEW gold_layer.fact_status_trash_dev AS
+CREATE VIEW gold_layer.fact_status_trash_final_dev AS
 SELECT
     *
 FROM [db_manufacturing_warehouse].[gold_layer].[fact_status_enriched_dev]
@@ -81,7 +82,7 @@ GO
 ===========================================================
 */
 
-CREATE VIEW gold_layer.fact_status_table_dev AS
+CREATE VIEW gold_layer.fact_status_table_final_dev AS
 SELECT * FROM [db_manufacturing_warehouse].[gold_layer].[fact_status_enriched_dev]
 WHERE run_time >= 0 AND performance <= 1.1496 AND oee <= 1
 GO

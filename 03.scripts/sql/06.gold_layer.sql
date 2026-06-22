@@ -166,6 +166,8 @@ SELECT
     f.work_station_id,
     f.failure_id,
     f.event_time,
+    DATEPART(HOUR, f.event_time) AS event_hour,
+    FORMAT(DATEPART(HOUR, f.event_time), N'00') + ':00' AS hour_bucket,
     f.unplanned_downtime,
     f.planned_downtime,
     f.failure_description
