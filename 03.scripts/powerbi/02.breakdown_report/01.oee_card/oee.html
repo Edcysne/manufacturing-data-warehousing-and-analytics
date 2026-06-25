@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<!-- Example values: OEE = 68 (below 85 target => red / Critical). Target line drawn at 85%. -->
+<div class='card-container'>
+    <div class='header-main'>
+        <div class='score-container'>
+            <svg class='score-svg' viewBox='0 0 80 80'>
+                <circle cx='40' cy='40' r='30' class='score-bg'/>
+                <circle cx='40' cy='40' r='30' class='score-fill'/>
+                <line x1='54.11' y1='20.58' x2='61.16' y2='10.88' class='score-meta'/>
+            </svg>
+            <div class='score-text-inside'>68%</div>
+        </div>
+        <div class='score-info-text'>
+            <span class='main-title'>OEE</span>
+            <div class='score-fraction'>68/100</div>
+            <div class='badge-score'>Critical</div>
+        </div>
+    </div>
+</div>
+</body>
+</html>
