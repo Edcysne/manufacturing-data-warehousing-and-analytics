@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<!-- Example values for Quality. Bar fill = 96%. Target line at 209/220. -->
+<div class='card-vendas'>
+  <div class='metric-item'>
+    <div class='metric-label'>Quality</div>
+    <div class='value-row'>
+      <div class='metric-value'>96.2%</div>
+      <div style="display:inline-flex;align-items:center;justify-content:center;border:1px solid #166534;border-radius:3px;padding:1px 4px;font-size:8px;font-weight:600;white-space:nowrap;height:16px;font-family:'Calibri', sans-serif;background:#F0FDF4;color:#166534;">↑ +1.2% to target</div>
+    </div>
+    <div class='bar-wrap'>
+      <svg class='bar-svg' viewBox='0 0 220 15' preserveAspectRatio='none'>
+        <rect x='0' y='0' width='220' height='15' rx='1px' fill='#D1D5DB'/>
+        <rect x='0' y='0' width='212' height='15' rx='1px' fill='#DCFCE7' stroke='#22C55E' stroke-width='1.5'/>
+        <line x1='209' y1='0' x2='209' y2='15' stroke='#15803D' stroke-width='1.5'/>
+      </svg>
+    </div>
+    <div class='footer-metrics'><span>Target: 95.0%</span></div>
+  </div>
+</div>
+</body>
+</html>
