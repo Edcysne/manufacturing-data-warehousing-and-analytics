@@ -53,7 +53,7 @@ STARTED:    06/19/2026
 
 DROP VIEW  IF EXISTS gold_layer.fact_status_trash_dev;
 DROP VIEW  IF EXISTS gold_layer.fact_status_trash_final_dev;
-DROP VIEW  IF EXISTS gold_layer.fact_status_table_dev;
+DROP VIEW  IF EXISTS gold_layer.fact_status_table_final_dev;
 DROP VIEW  IF EXISTS gold_layer.fact_breakdown_final_dev;
 
 DROP VIEW  IF EXISTS gold_layer.dim_date_final_dev;

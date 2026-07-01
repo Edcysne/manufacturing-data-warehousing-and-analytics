@@ -97,25 +97,33 @@ CREATE TABLE silver_layer.dim_date_dev (
     -- IDENTITY(1,1) makes the table autogenerate data starting from 1 and incrementing by 1
     date_id            INT IDENTITY(1,1) PRIMARY KEY,
     full_date          DATE NOT NULL,
+    date_key           INT NOT NULL,
     day_num            INT NOT NULL,
     day_name           VARCHAR(50) NOT NULL,
     week_num           INT NOT NULL,
+    week_name          VARCHAR(50) NOT NULL,
     month_num          INT NOT NULL,
     month_name         VARCHAR(50) NOT NULL,
+    quarter_num        INT NOT NULL,
+    quarter_name       VARCHAR(50) NOT NULL,
     year_num           INT NOT NULL,
     met_date_created   DATETIME2 DEFAULT GETDATE() -- A metadata column to get the creation date/time
 );
 GO
 
 -- Populating dim_date_dev table
-INSERT INTO silver_layer.dim_date_dev(full_date, day_num, day_name, week_num, month_num, month_name, year_num)
+INSERT INTO silver_layer.dim_date_dev(full_date, date_key, day_num, day_name, week_num, week_name, month_num, month_name, quarter_num, quarter_name, year_num)
 SELECT
     d.full_date,
+    CONVERT(INT, CONVERT(CHAR(8), d.full_date, 112)),  -- style 112 = YYYYMMDD (20250815)
     DATEPART(day, d.full_date),
     DATENAME(weekday, d.full_date),
     DATEPART(ISO_WEEK, d.full_date),
+    'W' + FORMAT(DATEPART(ISO_WEEK, d.full_date), '00'),
     DATEPART(month, d.full_date),
     DATENAME(month, d.full_date),
+    DATEPART(quarter, d.full_date),
+    'Q' + CAST(DATEPART(quarter, d.full_date) AS VARCHAR(1)),
     DATEPART(year, d.full_date)
 FROM (
     SELECT full_date FROM silver_layer.stg_breakdown WHERE full_date IS NOT NULL
@@ -379,7 +387,7 @@ JOIN silver_layer.dim_failures_dev f
     AND f.sub_code = s.sub_code
 JOIN silver_layer.dim_product_dev p 
     ON p.full_line = s.full_line;
-GO;
+GO
 
 -- Keys AFTER the load: clustered index FIRST, then the nonclustered PK
 -- (otherwise the PK would be rebuilt when the clustered index is added).

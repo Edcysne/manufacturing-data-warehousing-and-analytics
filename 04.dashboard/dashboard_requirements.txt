@@ -1,0 +1,165 @@
+new_performance = 
+// ---------------------------------------------------------
+// 🟩 [PASSO 1] - DADOS CONECTADOS AO MODELO (OEE PERFORMANCE)
+// ---------------------------------------------------------
+
+-- ⚠️ VALOR DE EXEMPLO. Substitua 0.85 pela sua medida real quando o modelo tiver dados.
+-- Quando a tabela fact_status_table_dev existir, troque por:
+--   DIVIDE ( SUMX ( fact_status_table_dev, fact_status_table_dev[performance] * fact_status_table_dev[run_time] ), SUM ( fact_status_table_dev[run_time] ) )
+VAR valor_num                      = 0.85                  -- Realizado: performance atual (ex.: 1,05 = 105%)
+VAR meta_num                       = 0.4                 -- Meta (target) de performance
+VAR rotulo_txt                     = "Performance"        -- Título principal do card
+
+-- Indicador secundário: distância em relação à meta (negativo = abaixo; positivo = acima)
+VAR dist_meta                      = valor_num - meta_num
+
+VAR prefixo_meta                   = "Target: "            -- Prefixo exibido antes do valor da meta
+VAR sufixo_dist                    = " vs target"          -- Texto complementar do indicador secundário
+
+
+// ---------------------------------------------------------
+// 🟨 [PASSO 2] - PERSONALIZE O DESIGN (OPCIONAL)
+// ---------------------------------------------------------
+
+-- Fontes
+VAR fonte_titulo                   = "'Segoe UI', sans-serif"   -- Fonte do título (Segoe UI Bold via font-weight)
+VAR fonte_texto                    = "'Segoe UI', sans-serif"   -- Fonte dos textos (meta, etc.)
+VAR fonte_numero                   = "'Calibri', sans-serif"    -- Fonte de todos os números
+
+-- Cores principais
+VAR cor_texto_principal            = "#1E293B"           -- Cor do valor principal
+VAR cor_texto_rotulo               = "#000000"           -- Cor do título
+VAR cor_texto_meta                 = "#64748B"           -- Cor do texto da meta
+VAR cor_fundo_barra_vazia          = "#D1D5DB"           -- Cor de fundo da barra vazia
+
+-- Cores de status
+VAR cor_status_critico             = "#EF4444"           -- Cor usada para status crítico (vermelho)
+VAR cor_status_bom                 = "#22C55E"           -- Cor usada para status bom (verde)
+
+-- Cores da linha de meta (acento mais escuro do status)
+VAR cor_linha_meta_critico         = "#B91C1C"           -- Linha de meta (acento escuro vermelho)
+VAR cor_linha_meta_bom             = "#15803D"           -- Linha de meta (acento escuro verde)
+
+-- Cores do badge secundário
+VAR fundo_badge_critico            = "#FDF0F0"           -- Fundo do badge negativo
+VAR fundo_badge_bom                = "#F0FDF4"           -- Fundo do badge positivo
+VAR texto_badge_critico            = "#B91C1C"           -- Cor do texto do badge negativo
+VAR texto_badge_bom                = "#16A34A"           -- Cor do texto do badge positivo (verde mais escuro)
+
+-- Cores de preenchimento da barra
+VAR fill_barra_critico             = "#FEE2E2"           -- Preenchimento da barra crítica (vermelho)
+VAR fill_barra_bom                 = "#DCFCE7"           -- Preenchimento da barra boa (verde)
+
+-- Tipografia
+VAR tam_fonte_titulo               = "13px"              -- Tamanho do título
+VAR tam_fonte_valor                = "24px"              -- Tamanho do valor principal
+VAR tam_fonte_meta                 = "8.5px"             -- Tamanho do texto de meta
+VAR tam_fonte_badge_mom            = "9px"              -- Tamanho do badge secundário (texto +1px)
+
+-- Componentes
+VAR altura_barra_svg               = 15                  -- Altura da barra SVG
+VAR arredondamento_bor             = "3px"               -- Arredondamento do badge
+VAR arredondamento_card            = "1px"               -- Arredondamento da barra
+VAR espessura_linha_meta           = 1.5                 -- Espessura da linha de meta
+
+-- Dimensões e espaçamentos
+VAR altura_canvas                  = 125                 -- Altura total do card
+VAR largura_canvas                 = 246                 -- Largura total do card
+VAR pad_superior                   = "0px"               -- Espaçamento interno superior
+VAR pad_inferior                   = "0px"               -- Espaçamento interno inferior
+VAR pad_esquerda                   = "20px"              -- Espaçamento interno à esquerda
+VAR pad_direita                    = "20px"              -- Espaçamento interno à direita
+
+
+// ---------------------------------------------------------
+// 🚫 LÓGICA DO SISTEMA (NÃO ALTERAR ABAIXO)
+// ---------------------------------------------------------
+
+VAR icon_seta_subida =
+    UNICHAR ( 8593 )
+
+VAR icon_seta_descida =
+    UNICHAR ( 8595 )
+
+-- Preenchimento da barra: limitado a 100% (teto máximo). A barra inteira representa 100%.
+VAR pct_barra =
+    MIN ( 1, MAX ( 0, valor_num ) )
+
+-- Estado da barra: vermelho se abaixo da meta OU acima de 100%.
+VAR esta_vermelho =
+    OR ( valor_num < meta_num, valor_num > 1 )
+
+-- Posição X da linha de meta dentro da barra (0..220, onde 220 = 100%).
+VAR pos_linha_meta =
+    ROUND ( 220 * MIN ( 1, MAX ( 0, meta_num ) ), 0 )
+
+VAR valor_txt =
+    SUBSTITUTE ( FORMAT ( valor_num, "0.0%" ), ".", "," )
+
+VAR meta_txt =
+    prefixo_meta & SUBSTITUTE ( FORMAT ( meta_num, "0.0%" ), ".", "," )
+
+-- Badge secundário: usa CLASSE CSS (não estilo inline), porque o visual HTML
+-- remove atributos style inline (cor/fundo). A classe vai no <head>, onde funciona.
+VAR badge_mom =
+    VAR classe = IF ( dist_meta >= 0, "badge-pos", "badge-neg" )
+    VAR v_lbl =
+        IF ( dist_meta > 0, icon_seta_subida & " +", icon_seta_descida & " -" ) &
+        SUBSTITUTE ( FORMAT ( ABS ( dist_meta ), "0.0%" ), ".", "," ) &
+        sufixo_dist
+    RETURN
+        "<div class='badge-base " & classe & "'>" & v_lbl & "</div>"
+
+VAR svg_barra =
+    VAR f_eff =
+        IF ( esta_vermelho, fill_barra_critico, fill_barra_bom )
+    VAR b_eff =
+        IF ( esta_vermelho, cor_status_critico, cor_status_bom )
+    VAR cor_linha_meta =
+        IF ( esta_vermelho, cor_linha_meta_critico, cor_linha_meta_bom )
+    RETURN
+        "<svg class='bar-svg' viewBox='0 0 220 15' preserveAspectRatio='none'>" &
+            "<rect x='0' y='0' width='220' height='15' rx='" & arredondamento_card & "' fill='" & cor_fundo_barra_vazia & "'/>" &
+            "<rect x='0' y='0' width='" & ROUND ( 220 * pct_barra, 0 ) & "' height='15' rx='" & arredondamento_card & "' fill='" & f_eff & "' stroke='" & b_eff & "' stroke-width='1.5'/>" &
+            "<line x1='" & pos_linha_meta & "' y1='0' x2='" & pos_linha_meta & "' y2='15' stroke='" & cor_linha_meta & "' stroke-width='" & SUBSTITUTE ( FORMAT ( espessura_linha_meta, "0.0" ), ",", "." ) & "'/>" &
+        "</svg>"
+
+VAR html_final =
+    "<!DOCTYPE html><html><head><style>
+*{box-sizing:border-box}
+::-webkit-scrollbar{width:0;height:0}
+html,body{margin:0;padding:0;background:transparent;width:" & largura_canvas & "px;height:" & altura_canvas & "px;overflow:hidden;}
+
+.card-vendas{font-family:" & fonte_texto & ";width:" & largura_canvas & "px;height:" & altura_canvas & "px;display:flex;align-items:center;background:transparent;}
+.metric-item{
+  width:100%;height:100%;
+  display:flex;flex-direction:column;justify-content:center;
+  padding:" & pad_superior & " " & pad_direita & " " & pad_inferior & " " & pad_esquerda & ";
+  border-right:none;
+}
+
+.metric-label{font-family:" & fonte_titulo & ";font-size:" & tam_fonte_titulo & ";font-weight:700;color:" & cor_texto_rotulo & ";margin-bottom:4px;white-space:nowrap;}
+.value-row{display:flex;align-items:center;gap:6px;margin-bottom:5px;}
+.metric-value{font-family:" & fonte_numero & ";font-size:" & tam_fonte_valor & ";font-weight:800;color:" & cor_texto_principal & ";white-space:nowrap;}
+.badge-base{display:inline-flex;align-items:center;justify-content:center;border:1px solid;border-radius:" & arredondamento_bor & ";padding:1px 4px;font-size:" & tam_fonte_badge_mom & ";font-weight:600;white-space:nowrap;height:16px;font-family:" & fonte_numero & ";}
+.badge-pos{color:" & texto_badge_bom & ";border-color:" & texto_badge_bom & ";background:" & fundo_badge_bom & ";}
+.badge-neg{color:" & texto_badge_critico & ";border-color:" & texto_badge_critico & ";background:" & fundo_badge_critico & ";}
+.bar-wrap{width:100%;height:" & altura_barra_svg & "px;margin-bottom:3px;}
+.bar-svg{width:100%;height:100%;display:block}
+.footer-metrics{display:flex;justify-content:flex-start;font-family:" & fonte_texto & ";font-size:" & tam_fonte_meta & ";font-weight:600;color:" & cor_texto_meta & ";}
+</style></head><body>
+<div class='card-vendas'>
+  <div class='metric-item'>
+    <div class='metric-label'>" & rotulo_txt & "</div>
+    <div class='value-row'>
+      <div class='metric-value'>" & valor_txt & "</div>
+      " & badge_mom & "
+    </div>
+    <div class='bar-wrap'>" & svg_barra & "</div>
+    <div class='footer-metrics'><span>" & meta_txt & "</span></div>
+  </div>
+</div>
+</body></html>"
+
+RETURN
+    html_final

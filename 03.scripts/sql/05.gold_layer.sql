@@ -69,11 +69,15 @@ CREATE VIEW gold_layer.dim_date_dev AS
 SELECT
     d.date_id,
     d.full_date,
+    d.date_key,
     d.day_num,
     d.day_name,
     d.week_num,
+    d.week_name,
     d.month_num,
     d.month_name,
+    d.quarter_num,
+    d.quarter_name,
     d.year_num
 FROM silver_layer.dim_date_dev d;
 GO
