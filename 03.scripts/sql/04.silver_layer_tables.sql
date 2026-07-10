@@ -49,8 +49,6 @@ SELECT
     b.ID                                               AS source_id,
     SUBSTRING(b.ID, 0, CHARINDEX('_', b.ID))           AS source_id_key,
     CONVERT(date, b.[date], 103)                       AS full_date,
-    -- crew letter ('Shift A'...'Shift D') parsed from the report file name embedded in the ID,
-    -- with the exact same rule used in stg_status so the two stagings can be joined on it
     TRIM(SUBSTRING(b.ID, CHARINDEX(' ', b.ID) + 1,CHARINDEX('.', b.ID) - CHARINDEX(' ', b.ID) - 1)) AS shift_abc,
     ISNULL(NULLIF(TRIM(b.work_station), ''), 'N/A')    AS work_station,
     ISNULL(NULLIF(TRIM(b.machine),    ''), 'N/A')      AS equipment,
@@ -88,7 +86,7 @@ WITH staged AS (
         -- collapse repeated whitespaces:
         REPLACE(REPLACE(REPLACE(TRIM(b.observations), ' ', '<>'), '><', ''), '<>', ' ')                    AS observations,
         b.version,
-        b.cycle_time
+        CONVERT(DECIMAL(5,2),NULLIF(TRIM(REPLACE(REPLACE(cycle_time, CHAR(13), ''), CHAR(10), '')), ''))   AS cycle_time
     FROM bronze_layer.status_data b
 ),
 ranked AS (
@@ -464,5 +462,6 @@ GO
             9.SILVER LAYER STATUS FACT TABLE
 ==============================================================
 */
+
 DROP TABLE IF EXISTS silver_layer.stg_breakdown;
 DROP TABLE IF EXISTS silver_layer.stg_status;
