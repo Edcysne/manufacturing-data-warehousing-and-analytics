@@ -2,7 +2,7 @@
 ================================================================================================
                                 GOLD LAYER - SECONDARY VIEWS
 ================================================================================================
-DATABASE:   db_manufacturing_warehouse
+DATABASE:   db_manufacturing_warehouse_pub
 SCHEMA:     gold_layer
 ------------------------------------------------------------------------------------------------
 PURPOSE:    The final, dashboard-facing presentation layer. It sits on top of the gold base
@@ -71,7 +71,7 @@ GO
 CREATE VIEW gold_layer.fact_status_trash_final_dev AS
 SELECT
     *
-FROM [db_manufacturing_warehouse].[gold_layer].[fact_status_enriched_dev]
+FROM [db_manufacturing_warehouse_pub].[gold_layer].[fact_status_enriched_dev]
 WHERE run_time < 0
    OR run_time IS NULL
    OR performance > 1.1496 
@@ -87,7 +87,7 @@ GO
 */
 
 CREATE VIEW gold_layer.fact_status_table_final_dev AS
-SELECT * FROM [db_manufacturing_warehouse].[gold_layer].[fact_status_enriched_dev]
+SELECT * FROM [db_manufacturing_warehouse_pub].[gold_layer].[fact_status_enriched_dev]
 WHERE run_time >= 0 AND performance <= 1.1496 AND oee <= 1
 GO
 
@@ -103,7 +103,7 @@ breakdown data from trash tables inside Power BI.
 */
 
 CREATE VIEW gold_layer.fact_breakdown_final_dev AS
-SELECT * FROM [db_manufacturing_warehouse].[gold_layer].[fact_breakdown_table_dev];
+SELECT * FROM [db_manufacturing_warehouse_pub].[gold_layer].[fact_breakdown_table_dev];
 GO
 
 /*
@@ -113,7 +113,7 @@ GO
 */
 
 CREATE VIEW gold_layer.dim_work_stations_final_dev AS
-SELECT * FROM [db_manufacturing_warehouse].[gold_layer].[dim_work_stations_dev];
+SELECT * FROM [db_manufacturing_warehouse_pub].[gold_layer].[dim_work_stations_dev];
 GO
 
 /*
@@ -123,7 +123,7 @@ GO
 */
 
 CREATE VIEW gold_layer.dim_failures_final_dev AS
-SELECT * FROM [db_manufacturing_warehouse].[gold_layer].[dim_failures_dev];
+SELECT * FROM [db_manufacturing_warehouse_pub].[gold_layer].[dim_failures_dev];
 GO
 
 /*
@@ -133,7 +133,7 @@ GO
 */
 
 CREATE VIEW gold_layer.dim_product_final_dev AS
-SELECT * FROM [db_manufacturing_warehouse].[gold_layer].[dim_product_dev];
+SELECT * FROM [db_manufacturing_warehouse_pub].[gold_layer].[dim_product_dev];
 GO
 
 /*
@@ -143,7 +143,7 @@ GO
 */
 
 CREATE VIEW gold_layer.dim_team_leaders_status_final_dev AS
-SELECT * FROM [db_manufacturing_warehouse].[gold_layer].[dim_team_leaders_status_dev];
+SELECT * FROM [db_manufacturing_warehouse_pub].[gold_layer].[dim_team_leaders_status_dev];
 GO
 
 /*
@@ -153,5 +153,5 @@ GO
 */
 
 CREATE VIEW gold_layer.dim_product_details_final_dev AS
-SELECT * FROM [db_manufacturing_warehouse].[gold_layer].[dim_product_details_dev];
+SELECT * FROM [db_manufacturing_warehouse_pub].[gold_layer].[dim_product_details_dev];
 GO

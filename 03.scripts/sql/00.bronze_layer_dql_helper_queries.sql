@@ -33,3 +33,10 @@ FROM (SELECT DISTINCT
 NULLIF(TRIM(REPLACE(REPLACE(cycle_time, CHAR(13), ''), CHAR(10), '')), '') AS cycle_time
 FROM bronze_layer.status_data) t
 WHERE t.cycle_time IS NOT NULL;
+
+-- Identify the column datatype script
+SELECT COLUMN_NAME, DATA_TYPE, CHARACTER_MAXIMUM_LENGTH
+FROM INFORMATION_SCHEMA.COLUMNS
+WHERE TABLE_SCHEMA = 'bronze_layer'
+  AND TABLE_NAME = 'status_data'
+  AND COLUMN_NAME = 'cycle_time';
