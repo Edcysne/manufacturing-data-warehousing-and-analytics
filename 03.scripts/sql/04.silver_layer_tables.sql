@@ -55,10 +55,10 @@ SELECT
     ISNULL(NULLIF(TRIM(b.failure_type), ''), 'N/A')    AS failure_type,
     ISNULL(NULLIF(TRIM(b.sub_failure_type),     ''), 'N/A')    AS sub_code,
     TRIM(b.line)                                       AS full_line,
-    b.event_time,
-    b.unplanned_downtime,
-    b.planned_downtime,
-    b.failure_description
+    CONVERT(TIME(0), TRIM(b.event_time))               AS event_time,
+    CONVERT(INT, TRIM(SUBSTRING(b.unplanned_downtime, 0, CHARINDEX('.', b.unplanned_downtime))))     AS unplanned_downtime,
+    CONVERT(INT, TRIM(SUBSTRING(b.planned_downtime, 0, CHARINDEX('.', b.planned_downtime))))         AS planned_downtime,
+    REPLACE(REPLACE(REPLACE(TRIM(b.failure_description), ' ', '<>'), '><', ''), '<>', ' ')           AS failure_description
 INTO silver_layer.stg_breakdown
 FROM bronze_layer.breakdown_data b;
 GO
@@ -72,17 +72,17 @@ GO
 DROP TABLE IF EXISTS silver_layer.stg_status;
 WITH staged AS (
     SELECT
-        b.ID                                                                                               AS source_id,
-        CONVERT(date, b.[date], 103)                                                                       AS full_date,
-        TRIM(b.line)                                                                                       AS full_line,
-        REPLACE(TRIM(b.shift),'evening', 'night')                                                          AS shift,
+        b.ID                                       AS source_id,
+        CONVERT(date, b.[date], 103)               AS full_date,
+        TRIM(b.line)                               AS full_line,
+        REPLACE(TRIM(b.shift),'evening', 'night')  AS shift,
         TRIM(SUBSTRING(b.ID, CHARINDEX(' ', b.ID) + 1,CHARINDEX('.', b.ID) - CHARINDEX(' ', b.ID) - 1))    AS shift_abc,
-        TRIM(b.leader)                                                                                     AS team_leader,
-        b.num_operators,
+        TRIM(b.leader)                             AS team_leader,
+        CONVERT(INT, TRIM(b.num_operators))        AS num_operators,
         CASE WHEN TRIM(b.shift) = 'night' THEN 450 ELSE 480 END                                            AS all_time,
-        b.total_produced,
-        b.nok_parts,
-        b.reworked_parts,
+        CONVERT(INT, TRIM(b.total_produced))       AS total_produced,
+        CONVERT(INT, TRIM(b.nok_parts))            AS nok_parts,
+        CONVERT(INT, TRIM(b.reworked_parts))       AS reworked_parts,
         -- collapse repeated whitespaces:
         REPLACE(REPLACE(REPLACE(TRIM(b.observations), ' ', '<>'), '><', ''), '<>', ' ')                    AS observations,
         b.version,
