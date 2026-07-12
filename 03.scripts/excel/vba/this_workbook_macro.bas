@@ -85,7 +85,7 @@ Private Sub Workbook_Open()
                 ws.Visible = xlSheetVisible
 
             ' Original
-            Case is_original And (ws.Name = "Central Panel" Or ws.Name = "Ship 1" Or ws.Name = "Ship 2" Or ws.Name = "Ship 3")
+            Case is_original And (ws.Name = "Central Panel" Or ws.Name = "Plant 1" Or ws.Name = "Plant 2" Or ws.Name = "Plant 3")
                 ws.Visible = xlSheetVisible
 
         End Select

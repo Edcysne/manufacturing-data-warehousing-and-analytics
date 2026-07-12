@@ -133,14 +133,14 @@ AY2 = FILTER(AX2:AX22, AX2:AX22<>"")     ' only categories that actually occurre
 
 ## 8. VBA Macros (`03.scripts/VBA/`)
 
-- `dataset_macro.bas` — `report_datasets()`: flattens the report into `tbl_failures` and `tbl_status` with `snake_case` headers. Normalization rules applied in VBA:
+- `dataset_macro.bas` - `report_datasets()`: flattens the report into `tbl_failures` and `tbl_status` with `snake_case` headers. Normalization rules applied in VBA:
   - Shift label → `morning` / `afternoon` / `evening` (from checkbox cells)
   - Team leader → `UCase$`
   - Surrogate ID → `workbook name & sheet name`
   - Date → real date value, not the typed string
   - Merged cells → resolved via `.MergeArea.Cells(1,1)`
   - Empty breakdown rows (no planned and no unplanned stoppage) deleted
-- `this_workbook_macro.bas` — workbook lifecycle events: `Open`, `BeforeSave`, `BeforeClose`
+- `this_workbook_macro.bas` - workbook lifecycle events: `Open`, `BeforeSave`, `BeforeClose`
 
 ## Output (what leaves Excel)
 

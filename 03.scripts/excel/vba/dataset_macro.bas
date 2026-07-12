@@ -199,13 +199,12 @@ next_sheet_breakdown:
     wsDataset.Cells(startRow, 4).Value = "shift"
     wsDataset.Cells(startRow, 5).Value = "leader"
     wsDataset.Cells(startRow, 6).Value = "num_operators"
-    wsDataset.Cells(startRow, 7).Value = "total_expected_output"
-    wsDataset.Cells(startRow, 8).Value = "total_produced"
-    wsDataset.Cells(startRow, 9).Value = "nok_parts"
-    wsDataset.Cells(startRow, 10).Value = "reworked_parts"
-    wsDataset.Cells(startRow, 14).Value = "observations"
-    wsDataset.Cells(startRow, 15).Value = "version"
-    wsDataset.Cells(startRow, 16).Value = "cycle_time"
+    wsDataset.Cells(startRow, 7).Value = "total_produced"
+    wsDataset.Cells(startRow, 8).Value = "nok_parts"
+    wsDataset.Cells(startRow, 9).Value = "reworked_parts"
+    wsDataset.Cells(startRow, 10).Value = "observations"
+    wsDataset.Cells(startRow, 11).Value = "version"
+    wsDataset.Cells(startRow, 12).Value = "cycle_time"
 
     outRow = startRow + 1
 
