@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<!-- Example values for Availability. Bar fill = 82%. Target line at 187/220. -->
+<div class='card-vendas'>
+  <div class='metric-item'>
+    <div class='metric-label'>Availability</div>
+    <div class='value-row'>
+      <div class='metric-value'>82.0%</div>
+      <div style="display:inline-flex;align-items:center;justify-content:center;border:1px solid #B91C1C;border-radius:3px;padding:1px 4px;font-size:8px;font-weight:600;white-space:nowrap;height:16px;font-family:'Calibri', sans-serif;background:#000000;color:#B91C1C;">↓ -3.0% to target</div>
+    </div>
+    <div class='bar-wrap'>
+      <svg class='bar-svg' viewBox='0 0 220 15' preserveAspectRatio='none'>
+        <rect x='0' y='0' width='220' height='15' rx='1px' fill='#D1D5DB'/>
+        <rect x='0' y='0' width='180' height='15' rx='1px' fill='#FEE2E2' stroke='#EF4444' stroke-width='1.5'/>
+        <line x1='187' y1='0' x2='187' y2='15' stroke='#B91C1C' stroke-width='1.5'/>
+      </svg>
+    </div>
+    <div class='footer-metrics'><span>Target: 85.0%</span></div>
+  </div>
+</div>
+</body>
+</html>
