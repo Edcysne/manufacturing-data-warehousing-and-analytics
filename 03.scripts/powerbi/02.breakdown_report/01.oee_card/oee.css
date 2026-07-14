@@ -1,0 +1,103 @@
+/* OEE circular card — extracted styles */
+*{box-sizing:border-box}
+::-webkit-scrollbar{width:0;height:0}
+html,body{
+    margin:0;
+    padding:0;
+    width:270px;
+    height:180px;
+    background:transparent;
+    overflow:hidden;
+}
+.card-container{
+    font-family:'Segoe UI', sans-serif;
+    width:270px;
+    height:180px;
+    display:flex;
+    align-items:center;
+    background:transparent;
+    padding:0px 16px 0px 16px;
+}
+.header-main{
+    height:100%;
+    width:100%;
+    display:flex;
+    align-items:center;
+    gap:12px;
+}
+.score-container{
+    position:relative;
+    width:120px;
+    height:120px;
+    flex-shrink:0;
+}
+.score-svg{
+    transform:rotate(-90deg);
+    width:120px;
+    height:120px;
+}
+.score-bg{
+    fill:none;
+    stroke:#F1F5F9;
+    stroke-width:8;
+}
+.score-fill{
+    fill:none;
+    stroke:#E63946;          /* status color: red when below target, green (#36B396) when met */
+    stroke-width:8;
+    stroke-linecap:round;
+    stroke-dasharray:188.50;
+    stroke-dashoffset:59.42; /* = circumference * (1 - value/100) */
+}
+.score-meta{
+    stroke:#0F172A;          /* target line */
+    stroke-width:2;
+    stroke-linecap:round;
+}
+.score-text-inside{
+    position:absolute;
+    top:50%;
+    left:50%;
+    transform:translate(-50%,-50%);
+    font-family:'Calibri', sans-serif;
+    font-weight:800;
+    font-size:24px;
+    color:#1E293B;
+}
+.score-info-text{
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    gap:2px;
+    min-width:0;
+    flex:1;
+    overflow:hidden;
+}
+.main-title{
+    font-family:'Segoe UI', sans-serif;
+    font-size:13px;
+    font-weight:700;
+    color:#000000;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+}
+.score-fraction{
+    font-family:'Calibri', sans-serif;
+    font-size:13px;
+    font-weight:800;
+    color:#1E293B;
+    line-height:1.1;
+}
+.badge-score{
+    font-family:'Segoe UI', sans-serif;
+    background:#E6394615;
+    color:#E63946;
+    padding:2px 6px;
+    border-radius:4px;
+    font-size:8px;
+    font-weight:800;
+    text-transform:uppercase;
+    width:fit-content;
+    line-height:1;
+}

@@ -6,7 +6,7 @@
 ' Last update:  04/03/2026
 ' Updated by:   Eduardo Cysne
 '
-' Processes all CTRL* reports present in the workbook.
+' Processes all STAND* reports present in the workbook.
 ' Generates two tables in the "Dataset" sheet (hidden):
 '   - tbl_failures -> log of stoppages by schedule and station
 '   - tbl_status   -> production summary by shift/line
@@ -16,14 +16,12 @@
 '   - Workbook_BeforeClose
 '
 ' CHANGE V02:
-'   - Loop through ALL CTRL* sheets (previously only processed the first one)
+'   - Loop through ALL STAND* sheets (previously only processed the first one)
 '   - Production check across all sheets before processing
-'   - Uses xlSheetVeryHidden instead of xlSheetHidden
 '====================================================================================
 Option Explicit
 
-Private Const x_password As String = "x0205"
-
+Private Const x_password As String = "x123"
 
 Sub report_datasets()
 
@@ -36,14 +34,14 @@ Sub report_datasets()
     ThisWorkbook.Unprotect Password:=x_password
 
     '------------------------------------------
-    ' Check if any CTRL sheet has production.
+    ' Check if any STAND sheet has production.
     '------------------------------------------
     Dim has_production  As Boolean
     Dim ws              As Worksheet
     
     has_production = False
     For Each ws In ThisWorkbook.Worksheets
-        If ws.Name Like "CTRL*" Then
+        If ws.Name Like "STAND*" Then
             ws.Unprotect Password:=x_password
             If Val(ws.Range("G93").Value) <> 0 Then
                 has_production = True
@@ -101,7 +99,7 @@ Sub report_datasets()
     wb_name = ThisWorkbook.Name
     
     For Each ws In ThisWorkbook.Worksheets
-        If ws.Name Like "CTRL*" Then
+        If ws.Name Like "STAND*" Then
 
             ws.Unprotect Password:=x_password
 
@@ -209,10 +207,10 @@ next_sheet_breakdown:
     outRow = startRow + 1
 
     '----------------------------------
-    ' Loop through all the CTRL sheets
+    ' Loop through all the STAND sheets
     '----------------------------------
     For Each ws In ThisWorkbook.Worksheets
-        If ws.Name Like "CTRL*" Then
+        If ws.Name Like "STAND*" Then
 
             ws.Unprotect Password:=x_password
             
@@ -301,4 +299,3 @@ no_production_end:
     Application.ScreenUpdating = True
 
 End Sub
-
