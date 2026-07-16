@@ -170,6 +170,11 @@ GO
 The status fact enriched with the OEE calculation. The ratio
 columns are CAST to DECIMAL(9,4) for clean presentation; as a
 view there is no storage type to overflow.
+
+Also exposes the scrap costing: scrap_cost_eur (per-unit cost
+of the model, carried on the silver fact from
+03.dashboard/model_scrap_costs.xlsx) and the derived
+total_scrap_cost_eur = nok_parts * scrap_cost_eur.
 ==============================================================
 */
 
@@ -207,6 +212,7 @@ base AS (
         s.total_produced,
         s.nok_parts,
         s.reworked_parts,
+        s.scrap_cost_eur,
         s.all_time,
         s.observations,
         pd.cycle_time,
@@ -255,6 +261,8 @@ SELECT
     total_produced,
     nok_parts,
     reworked_parts,
+    scrap_cost_eur,
+    CAST(nok_parts * scrap_cost_eur AS DECIMAL(12,2)) AS total_scrap_cost_eur,
     all_time,
     observations,
     ok_parts,

@@ -6,6 +6,7 @@ According to experience and the website https://www.leanproduction.com/oee/, the
 - `nok_parts`
 - `reworked_parts`
 - `all_time`
+- `scrap_cost_eur` (per-unit scrap cost of the model, from `03.dashboard/model_scrap_costs.xlsx`)
 
 ## Calculations
 
@@ -23,3 +24,4 @@ According to experience and the website https://www.leanproduction.com/oee/, the
 | `ok_first_parts` | `ok_parts - reworked_parts` |
 | `ftq` | `ok_first_parts / total_produced` |
 | `oee` | `availability x performance x quality` |
+| `total_scrap_cost_eur` | `nok_parts x scrap_cost_eur` |

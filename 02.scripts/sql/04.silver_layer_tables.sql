@@ -28,6 +28,10 @@ NOTES:      - All tables carry the _dev suffix and are used for testing.
             recovered from the report file name embedded in the source ID (joined back
             to the status staging), so BI can relate breakdowns to
             dim_team_leaders_status_dev.
+            - The status fact carries scrap_cost_eur: the per-unit scrap cost of the
+            appliance model, sourced from 03.dashboard/model_scrap_costs.xlsx and
+            looked up by manufacturer + model (LEFT JOIN: unknown models keep their
+            rows with a NULL cost).
 
 ------------------------------------------------------------------------------------------------
 AUTHOR:     Eduardo Cysne
@@ -410,6 +414,10 @@ GO
 ==============================================================
 */
 
+-- Per-unit scrap cost by appliance model, transcribed from
+-- 03.dashboard/model_scrap_costs.xlsx (sheet: scrap_costs).
+-- LEFT JOINed on manufacturer + model so a model missing from the
+-- costing file never drops a fact row (it just carries a NULL cost).
 DROP TABLE IF EXISTS silver_layer.fact_status_table_dev;
 SELECT
     s.source_id,
@@ -420,6 +428,7 @@ SELECT
     s.total_produced,
     s.nok_parts,
     s.reworked_parts,
+    CAST(sc.scrap_cost_eur AS DECIMAL(10,2)) AS scrap_cost_eur,
     tl.all_time,
     s.observations,
     CAST(SYSDATETIME() AS DATETIME2) AS met_date_created
@@ -435,6 +444,16 @@ JOIN silver_layer.dim_team_leaders_status_dev tl
 JOIN silver_layer.dim_product_details_dev pd
     ON pd.version = s.version
     AND pd.cycle_time = s.cycle_time
+LEFT JOIN (VALUES
+    ('HAUSBERG',  'DuraWash 500',   42.50),
+    ('HAUSBERG',  'BakePro 700',    55.00),
+    ('HAUSBERG',  'FrostCool 550',  48.75),
+    ('WEISSTECH', 'EcoWash 300',    35.20),
+    ('WEISSTECH', 'SpinDry 580',    39.90),
+    ('WEISSTECH', 'AquaMaster 360', 44.60)
+) sc (manufacturer, model, scrap_cost_eur)
+    ON sc.manufacturer = p.manufacturer
+    AND sc.model = p.model
 -- same behavior the old inner join to dim_date had: dateless rows are dropped
 WHERE s.full_date IS NOT NULL;
 
