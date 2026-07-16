@@ -216,8 +216,6 @@ base AS (
     FROM silver_layer.fact_status_table_dev s
     JOIN silver_layer.dim_product_details_dev pd
         ON pd.product_details_id = s.product_details_id
-    -- tl carries the status row's shift (keys the downtime match below) and the
-    -- crew size (num_operators), used to normalize pplh to an operator-hour basis.
     JOIN silver_layer.dim_team_leaders_status_dev tl
         ON tl.team_leader_status_id = s.team_leader_status_id
     LEFT JOIN breakdown_downtime bd
@@ -267,10 +265,7 @@ SELECT
     performance,
     availability,
     fully_productive_time,
-    -- Parts Per Labor Hour: throughput normalized by crew size, per productive hour.
-    -- fully_productive_time is in minutes, so (fpt * num_operators / 60.0) is operator-hours.
-    CAST(CAST(total_produced AS DECIMAL(9,4))
-         / NULLIF(fully_productive_time * num_operators / 60.0, 0)                  AS DECIMAL(9,4)) AS pplh,
+    CAST(CAST(total_produced AS DECIMAL(9,4)) / NULLIF(fully_productive_time * num_operators / 60.0, 0)         AS DECIMAL(9,4)) AS pplh,
     (ok_parts - reworked_parts)                                                                       AS ok_first_parts,
     CAST(CAST(ok_parts - reworked_parts AS DECIMAL(9,4)) / NULLIF(total_produced, 0) AS DECIMAL(9,4)) AS ftq,
     CAST((availability * performance * quality)                                      AS DECIMAL(9,4)) AS oee

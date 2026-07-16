@@ -24,13 +24,13 @@ Since the data artificially generated has low scores, I will adjust the metric v
 
 #### 1.2.1. EDA Summary (from `eda_metrics.ipynb`)
 
-The KPIs are defined by manufacturer: **HAUSBERG** & **WEISSTECH**. The dataset was analyzed in the Jupyter notebook `03.scripts/python/eda_metrics.ipynb`, querying `gold_layer.fact_status_table_final_dev`.
+The KPIs are defined by manufacturer: **HAUSBERG** & **WEISSTECH**. The dataset was analyzed in the Jupyter notebook `02.scripts/python/eda_metrics.ipynb`, querying `gold_layer.fact_status_table_final_dev`.
 
 | Metric | HAUSBERG | WEISSTECH | Total |
 |---|---|---|---|
-| Total rows of production | 163,603 | 164,044 | 327,647 |
-| Rows above 85% OEE | 2,449 | 2,101 | — |
-| % of rows above 85% OEE | 1.50% | 1.28% | — |
+| Total rows of production | 198,631 | 198,568 | 397,199 |
+| Rows above 85% OEE | 198 | 181 | — |
+| % of rows above 85% OEE | 0.10% | 0.09% | — |
 
 **Conclusion:** since we have few data to use the golden OEE rule of 85%, we'll base ourselves on the third quartile (75%).
 
@@ -39,55 +39,55 @@ The KPIs are defined by manufacturer: **HAUSBERG** & **WEISSTECH**. The dataset 
 | Color | Rule |
 |---|---|
 | 🟢 Green | Value at or above the green KPI goal. |
-| 🟡 Yellow | 90% of the green KPI goals. The OEE metric will be 95% of the green one. |
+| 🟡 Yellow | Derived from the green goals: OEE and FTQ at 95% of green, PPLH at 90% of green, Performance and Quality relaxed slightly, and Availability recalculated as OEE ÷ (Performance × Quality). |
 | 🔴 Red | Below the minimum for yellow KPIs. |
-| 🟣 Purple | Sometimes the performance surpasses 100% and this is incorrect. To call the user's attention we will display it with pink. |
+| 🟣 Purple | Sometimes the performance surpasses 100% and this is incorrect. To call the user's attention we will display it with purple. |
 
 #### 1.2.3. HAUSBERG KPI Goals
 
 | KPI | 🟢 Green | 🟡 Yellow |
 |---|---|---|
-| OEE | 74.06% | 70.35% |
+| OEE | 70.26% | 66.75% |
 | Performance | 90.0% | 88.0% |
-| Availability | 83.12% | 81.57% |
+| Availability | 78.86% | 77.40% |
 | Quality | 99.0% | 98.0% |
-| FTQ | 97.74% | 87.96% |
-| PPLH | 0.46 | 0.414 |
+| FTQ | 97.74% | 92.85% |
+| PPLH | 12.33 | 11.10 |
 
-**HAUSBERG values of reference** (163,603 rows):
+**HAUSBERG values of reference** (198,631 rows):
 
 | | quality | performance | availability | pplh | ftq | oee |
 |---|---|---|---|---|---|---|
-| mean | 0.963564 | 0.895810 | 0.809305 | 0.331133 | 0.943570 | 0.688606 |
-| std | 0.033856 | 0.139672 | 0.093739 | 0.170897 | 0.046006 | 0.076624 |
-| min | 0.714300 | 0.373200 | 0.457100 | 0.067200 | 0.594600 | 0.310800 |
-| 25% | 0.949200 | 0.830700 | 0.742900 | 0.182100 | 0.921600 | 0.639000 |
-| 50% | 0.973300 | 0.911300 | 0.800000 | 0.263200 | 0.957100 | 0.691200 |
-| 75% | 0.986300 | 0.992400 | 0.871400 | 0.468400 | 0.977400 | 0.740650 |
-| max | 1.000000 | 1.149600 | 1.000000 | 0.834600 | 1.000000 | 0.999400 |
+| mean | 0.963451 | 0.784194 | 0.882012 | 9.640994 | 0.943395 | 0.649877 |
+| std | 0.033984 | 0.159126 | 0.120021 | 6.861431 | 0.046184 | 0.073557 |
+| min | 0.714300 | 0.358400 | 0.457100 | 1.500000 | 0.594600 | 0.304300 |
+| 25% | 0.949200 | 0.636000 | 0.780000 | 4.608900 | 0.921300 | 0.600500 |
+| 50% | 0.973300 | 0.815100 | 0.880900 | 7.866700 | 0.956900 | 0.653400 |
+| 75% | 0.986300 | 0.913000 | 1.000000 | 12.333300 | 0.977400 | 0.702600 |
+| max | 1.000000 | 1.149600 | 1.000000 | 49.920000 | 1.000000 | 0.943900 |
 
 #### 1.2.4. WEISSTECH KPI Goals
 
 | KPI | 🟢 Green | 🟡 Yellow |
 |---|---|---|
-| OEE | 73.77% | 70.08% |
+| OEE | 70.00% | 66.50% |
 | Performance | 90.0% | 88.0% |
-| Availability | 82.79% | 81.26% |
+| Availability | 78.56% | 77.11% |
 | Quality | 99.0% | 98.0% |
-| FTQ | 97.74% | 87.96% |
-| PPLH | 0.46 | 0.414 |
+| FTQ | 97.20% | 92.34% |
+| PPLH | 10.18 | 9.16 |
 
-**WEISSTECH values of reference** (164,044 rows):
+**WEISSTECH values of reference** (198,568 rows):
 
 | | quality | performance | availability | pplh | ftq | oee |
 |---|---|---|---|---|---|---|
-| mean | 0.960615 | 0.895217 | 0.809428 | 0.279251 | 0.939066 | 0.686102 |
-| std | 0.033843 | 0.139902 | 0.093716 | 0.125909 | 0.045202 | 0.076183 |
-| min | 0.729700 | 0.437900 | 0.450700 | 0.079300 | 0.634100 | 0.338400 |
-| 25% | 0.944400 | 0.829600 | 0.743200 | 0.181800 | 0.915700 | 0.637000 |
-| 50% | 0.968400 | 0.910250 | 0.802300 | 0.238400 | 0.949200 | 0.688600 |
-| 75% | 0.984100 | 0.991900 | 0.871400 | 0.355400 | 0.972200 | 0.737725 |
-| max | 1.000000 | 1.149600 | 1.000000 | 0.829700 | 1.000000 | 0.982900 |
+| mean | 0.960456 | 0.783319 | 0.882343 | 8.117393 | 0.938794 | 0.647413 |
+| std | 0.033989 | 0.158979 | 0.119818 | 5.318733 | 0.045387 | 0.073402 |
+| min | 0.729700 | 0.365600 | 0.450700 | 1.422200 | 0.634100 | 0.298700 |
+| 25% | 0.944400 | 0.635600 | 0.780700 | 4.458300 | 0.915300 | 0.598200 |
+| 50% | 0.968300 | 0.814200 | 0.881300 | 6.584700 | 0.949000 | 0.651200 |
+| 75% | 0.984100 | 0.911900 | 1.000000 | 10.185200 | 0.972000 | 0.700000 |
+| max | 1.000000 | 1.149600 | 1.000000 | 49.216600 | 1.000000 | 0.947500 |
 
 ## 2. Breakdown Report
 
