@@ -1,7 +1,11 @@
 /*
-Bulking inserting with .csv files. 
+Bulking inserting with .csv files.
 AZURE free account expired... ;(
 I'll continue the project with a normal database
+
+NOTE: Replace <path-to-bulk-insert-data-folder> below with the local absolute
+path to the folder holding breakdown_data.csv and status_data.csv.
+The CSVs are not versioned (see .gitignore) — they are too large for GitHub.
 */
 
 USE db_manufacturing_warehouse_pub;
@@ -27,7 +31,7 @@ BEGIN
         -- Start & End time to get the loading time in seconds
         SET @start_time = GETDATE()
         BULK INSERT bronze_layer.breakdown_data
-        FROM 'C:\Users\amcys\Documents\02.Education\01.Online Education\05.projects\manufacturing_data_warehousing_public\00.bulk_insert_data\breakdown_data.csv'
+        FROM '<path-to-bulk-insert-data-folder>\breakdown_data.csv'
         WITH (
             FORMAT = 'CSV',
             FIRSTROW = 3,           -- The second row is ---,--------,----- generated with the bcp
@@ -47,7 +51,7 @@ BEGIN
         PRINT'===============================';
         SET @start_time = GETDATE()
         BULK INSERT bronze_layer.status_data
-        FROM 'C:\Users\amcys\Documents\02.Education\01.Online Education\05.projects\manufacturing_data_warehousing_public\00.bulk_insert_data\status_data.csv'
+        FROM '<path-to-bulk-insert-data-folder>\status_data.csv'
         WITH(
             FORMAT = 'CSV',
             FIRSTROW = 3,           -- The second row is ---,--------,----- generated with the bcp
