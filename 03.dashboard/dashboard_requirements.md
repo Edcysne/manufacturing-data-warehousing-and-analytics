@@ -104,4 +104,4 @@ The KPIs are defined by manufacturer: **HAUSBERG** & **WEISSTECH**. The dataset 
 
 | # | Visual | Description |
 |---|--------|-------------|
-| 1 | Decomposition Tree | Layers between **Breakdown Category → Breakdown Sub-Category → Products**. |
+| 1 | Decomposition Tree | Layers between **Products → Breakdown Category → Breakdown Sub-Category**.
