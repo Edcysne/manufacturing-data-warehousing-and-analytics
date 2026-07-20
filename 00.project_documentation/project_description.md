@@ -168,7 +168,7 @@ The performance is measured by a manufacturing KPI called Overall Equipament Efe
 
 The following image explains the dynamic:
 
-![image.png](image.png)
+![image.png](oee_calculation.png)
 
 Right now, the company relies explicicitly on Excel with advanced formulas to calculate the OEE per product produced. This approach has several issues, including:
 

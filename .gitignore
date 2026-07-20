@@ -23,6 +23,10 @@ git diff
 # Hex-named Git temp files (e.g. C7B84340)
 [0-9A-Fa-f][0-9A-Fa-f][0-9A-Fa-f][0-9A-Fa-f][0-9A-Fa-f][0-9A-Fa-f][0-9A-Fa-f][0-9A-Fa-f]
 
-# Claude files 
+# Claude files
 *.claude
-.claude/00.bulk_insert_data/*.csv
+
+# Bulk insert source data — multi-GB CSVs, exceed GitHub's 100 MB file limit
+00.bulk_insert_data/
+*.csv
+!00.project_documentation/products_listing.csv
