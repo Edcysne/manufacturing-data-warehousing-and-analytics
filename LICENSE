@@ -19,3 +19,33 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
+
+---
+
+SCOPE OF THIS LICENSE
+
+The MIT license above applies to the source code in this repository:
+SQL scripts, Python scripts and notebooks, VBA modules, and the CSS/HTML
+used in the Power BI custom visuals.
+
+Documentation, diagrams, mockups and dashboard design assets
+(00.project_documentation/, 01.images/mockups/, 01.images/drawio/,
+01.images/png-jpg/, 03.dashboard/) are licensed under
+Creative Commons Attribution 4.0 International (CC BY 4.0):
+https://creativecommons.org/licenses/by/4.0/
+
+All data in this repository is synthetic and released into the public
+domain (CC0). LOMPSTAR, HAUSBERG and WEISSTECH are fictional companies;
+all names, products and figures are invented and do not represent any
+real organisation, person or product.
+
+THIRD-PARTY TRADEMARKS — EXCLUDED
+
+The following are the property of their respective owners and are NOT
+covered by the licenses above. They are included only to identify the
+technologies used, and remain subject to their owners' brand guidelines:
+
+  01.images/icons-logos/png/azure.png                — Microsoft Corporation
+  01.images/icons-logos/png/python.png               — Python Software Foundation
+  01.images/icons-logos/png/github_logo_white.png    — GitHub, Inc.
+  01.images/icons-logos/png/linkedin_logo_white.png  — LinkedIn Corporation
