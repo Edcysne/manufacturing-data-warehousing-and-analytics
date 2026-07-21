@@ -26,7 +26,7 @@ git diff
 # Claude files
 *.claude
 
-# Bulk insert source data — multi-GB CSVs, exceed GitHub's 100 MB file limit
+# Bulk insert source data
 00.bulk_insert_data/
 *.csv
 !00.project_documentation/products_listing.csv
