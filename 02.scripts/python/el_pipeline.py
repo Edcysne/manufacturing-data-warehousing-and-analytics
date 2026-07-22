@@ -12,7 +12,7 @@
 #                     - status_data     (shift KPI summary)
 #                5. Logs every processed file in file_log (success or error)
 #
-# Source       : Leader Production Summaries (.xlsm) — Sheet: "Dataset"
+# Source       : Leader Production Summaries (.xlsm) - Sheet: "Dataset"
 # Destination  : Azure SQL Database -> Bronze Layer
 #
 # Author       : Eduardo Cysne
@@ -170,7 +170,7 @@ def insert_breakdown(cursor: pyodbc.Cursor, df: pd.DataFrame) -> None:
             _clean(row['schedule']),          # datetime.time -> TIME(0)
             _clean(row.get('unplanned_stoppages')),
             _clean(row.get('planned_stoppages')),
-            _clean(row.get('work_station')),  # VARCHAR(50) — requires schema fix
+            _clean(row.get('work_station')),  # VARCHAR(50) - requires schema fix
             _clean(row.get('equipment')),
             _clean(row.get('failure_type')),
             _clean(row.get('sub_code')),
@@ -278,7 +278,7 @@ def run_pipeline() -> None:
             log_file(file_name, 'success')
             success_count += 1
             print(
-                f"  🟢 Loaded — "
+                f"  🟢 Loaded - "
                 f"{len(breakdown_df)} breakdown row(s) | "
                 f"{len(status_df)} status row(s)"
             )
@@ -293,7 +293,7 @@ def run_pipeline() -> None:
     conn.close()
 
     print(f"\n{'=' * 50}")
-    print(f"Pipeline complete — {success_count} loaded | {error_count} errors")
+    print(f"Pipeline complete - {success_count} loaded | {error_count} errors")
     print(f"{'=' * 50}")
 
 
