@@ -19,3 +19,9 @@ I think it would be better to add another dimension table on the modeling making
 morning -> 06:00-14:00 <br>
 afternoon -> 14:00-22:00 <br>
 evening -> 22:00-06:00 (wraps midnight)
+
+# 4th Mistake
+
+At the dashboard development I forgot 2 things:
+1. **Dashboard KPIs Colors:** There should be a way to automatically change the goals on the main table visual inside the 01. Overall Report. The way it's structured it's very amateur. I need to think about it later;
+2. **The Production Leader Column Chart:** When building the chart I was with filters on and didn't realize that I had a lot of team leaders for a normal column chart! The most appropiate would be a horizontal bar chart, but for that I would have to change completely the layout. It's an improvement to make in the future.

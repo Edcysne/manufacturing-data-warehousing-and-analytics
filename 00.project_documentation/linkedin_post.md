@@ -28,7 +28,7 @@ If you are interested in using HTML and CSS for custom visuals in low-volume Pow
 
 🔗 Links to the GitHub repo and the data warehousing tutorial are in the comments.
 
-#DataAnalytics #DataEngineering #AnalyticsEngineering #DataWarehouse #ETL #SQL #Python
+#DataAnalytics #DataEngineering #AnalyticsEngineering #DataWarehouse
 
 ## 1st comment
 
