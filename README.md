@@ -234,7 +234,7 @@ Installation references: [jupyter.org/install](https://jupyter.org/install) ·
 > The committed notebook keeps its saved outputs from an earlier run. Re-execute the
 > cells against your own database - the numbers will differ from the ones shown.
 
-### 6. Open the dashboard
+### 4. Open the dashboard
 Open [`03.dashboard/production_control.pbix`](03.dashboard/production_control.pbix)
 in Power BI Desktop and point its data source at your gold-layer views.
 
