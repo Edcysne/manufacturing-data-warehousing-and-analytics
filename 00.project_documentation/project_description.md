@@ -116,7 +116,7 @@ LOMPSTAR is a large scale manufacturing company, and it has the following produc
 
 ### 1.4.1 Facilities Distribution
 
-### **Ship 1 / JIT / Drive Units**
+### **Fabric 1 / JIT / Drive Units**
 
 - Bruno Carvalho 🇵🇹 / **Ship 1** / Drum Unit
 - Inês Teixeira 🇵🇹 / **Ship 1** / Drum Unit
@@ -127,7 +127,7 @@ LOMPSTAR is a large scale manufacturing company, and it has the following produc
 
 ---
 
-### **Ship 2 / JIT / Panels**
+### **Fabric 2 / JIT / Panels**
 
 - Hugo Mendes 🇵🇹 / **Ship 2** / Door Panel (incl. Spare Parts)
 - Daniela Santos 🇵🇹 / **Ship 2** / Door Panel (incl. Spare Parts)
@@ -138,7 +138,7 @@ LOMPSTAR is a large scale manufacturing company, and it has the following produc
 
 ---
 
-### **Ship 3 / Assembly / Boards + Control Panel**
+### **Fabric 3 / Assembly / Boards + Control Panel**
 
 - Rafael Oliveira 🇧🇷 / **Ship 3** / Main Board
 - Luís Correia 🇵🇹 / **Ship 3** / Main Board
@@ -155,9 +155,9 @@ LOMPSTAR is a large scale manufacturing company, and it has the following produc
 
 ## 1.5. Company Issue
 
-Each Team Leader is responsible for completing an excel document called “Production Summary”. This document consolidates data from various production systems, along with manual inputs such as accidents, non-conforming parts, reworked parts, downtime, and other operational observations. The current system has automations that insert data into the report, but the report lacks data treatment and data normalization.
+Everyday a “Production Summary” excel is generated. This document consolidates data from various production systems, along with manual inputs such as non-conforming parts, reworked parts, downtime, and other operational observations. The current system has automations that insert data into the report, but the report lacks data treatment and data normalization.
 
-At the end of all 3 shifts of the day (Morning, Evening and Night), the summaries are printed, collected and sent to the Production Unit Manager, who analyses which shift/product had the worst performance of the day.
+At the end of all 3 shifts of the day (Morning, Afternoon and Evening), the summaries are printed, collected and sent to the Production Unit Manager, who analyses which shift/product had the worst performance of the day.
 
 The performance is measured by a manufacturing KPI called Overall Equipament Efectiviness (OEE) and it’s calculated by the formula:
 
